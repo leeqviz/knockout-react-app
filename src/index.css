@@ -1,0 +1,10 @@
+/* src/index.css */
+
+/* 1. Импортируем переменные темы (цвета, шрифты, брейкпоинты) */
+@import "tailwindcss/theme" layer(theme);
+
+/* 2. Импортируем генератор утилитарных классов (p-4, bg-blue-500 и т.д.) */
+@import "tailwindcss/utilities" layer(utilities);
+
+/* Мы намеренно НЕ импортируем "tailwindcss/preflight", 
+   чтобы старый Knockout-сайт и его верстка остались в полной безопасности! */

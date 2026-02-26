@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Knockout + jQuery + React App</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      .old-knockout-app {
+        padding: 20px;
+        border: 2px dashed #ff9900;
+        max-width: 400px;
+      }
+      .ko-data {
+        background: #fff3e0;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="old-knockout-app">
+      <h2>Приложение на Knockout</h2>
+      <p class="ko-data">
+        Выбранная дата: <strong data-bind="text: globalDate"></strong>
+      </p>
+      <p>Значение из React: <strong data-bind="text: globalCount"></strong></p>
+      <!-- value: globalCount - связываем значение с глобальной переменной (двусторонняя привязка),
+       valueUpdate: 'input' - обновляем значение при вводе, а не при выходе из инпута (blur) -->
+      <input
+        data-bind="value: globalCount, valueUpdate: 'input'"
+        type="number"
+      />
+    </div>
+    <br />
+    <!-- React Компонент встраивается как виджет в div через data-bind от Knockout, чтобы иметь двустороннюю привязку и обмен данными -->
+    <div
+      data-bind="reactMain: { 
+            component: ReactMainComponent, 
+            props: { count: globalCount, setCount: setGlobalCount } 
+        }"
+    ></div>
+    <div
+      data-bind="reactDatepicker: { 
+            component: ReactDatepickerComponent, 
+            props: { date: globalDate, setDate: setGlobalDate } 
+        }"
+    ></div>
+    <!-- Инициализация Knockout как оболочки -->
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>
