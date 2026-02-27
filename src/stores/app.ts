@@ -1,4 +1,4 @@
-import { User } from "@/types/user";
+import type { User } from "@/types/user";
 import { useStore } from "zustand";
 import { createStore } from "zustand/vanilla";
 

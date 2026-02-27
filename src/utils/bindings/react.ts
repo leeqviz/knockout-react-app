@@ -1,4 +1,4 @@
-import {
+import type {
   HTMLElementWithReact,
   ReactBindingOptions,
 } from "@/types/bindings/react";
@@ -26,7 +26,7 @@ export const reactBindingHandler: KnockoutBindingHandler = {
   // 4. Обновление биндинга: рендерим React-компонент с новыми пропсами при каждом изменении наблюдаемых переменных. Функция valueAccessor возвращает то, что написано в HTML (наш объект с component и props). Мы пропускаем его через ko.unwrap(), на случай если сам конфигурационный объект тоже оказался реактивным.
   update: function (
     element: HTMLElementWithReact,
-    valueAccessor: () => ReactBindingOptions,
+    valueAccessor: () => ReactBindingOptions, // possibly any value
   ) {
     // 1. Получаем конфигурацию биндинга, которая включает в себя React-компонент и его пропсы. Мы используем ko.unwrap, чтобы получить чистые значения, даже если они были определены как наблюдаемые переменные в Knockout
     const options = ko.unwrap(valueAccessor());
@@ -45,7 +45,8 @@ export const reactBindingHandler: KnockoutBindingHandler = {
     }
 
     // 3. Рендерим компонент React внутри нашего элемента, используя ранее созданный корневой элемент. Мы передаем в компонент все распакованные пропсы, что позволяет ему корректно реагировать на изменения данных из Knockout. Здесь нельзя использовать JSX, поэтому мы используем createElement для создания элемента React и передаем ему все необходимые пропсы
-    if (element._reactRoot)
+    if (element._reactRoot && Component) {
       element._reactRoot.render(createElement(Component, reactProps));
+    }
   },
 };

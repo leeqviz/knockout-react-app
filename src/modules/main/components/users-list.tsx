@@ -7,7 +7,7 @@ export default function UsersList() {
 
   return (
     <div>
-      {users.map((u) => (
+      {users.map((u: any) => (
         <div key={u.id}>{u.name}</div>
       ))}
       <button onClick={() => addUser("Новый юзер")}>Добавить</button>
