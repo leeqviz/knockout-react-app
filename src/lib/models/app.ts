@@ -1,5 +1,5 @@
-import { DatepickerRoot } from "@/modules/datepicker";
-import { MainRoot } from "@/modules/main";
+import { DatepickerEntryPoint } from "@/modules/datepicker";
+import { MainEntryPoint } from "@/modules/main";
 import { vanillaStore } from "@/stores/app";
 import { User } from "@/types/user";
 import ko from "knockout";
@@ -26,8 +26,8 @@ export class AppViewModel {
       new Date().toISOString().split("T")[0],
     );
     // Делаем React-компонент частью ViewModel
-    this.ReactMainComponent = MainRoot;
-    this.ReactDatepickerComponent = DatepickerRoot;
+    this.ReactMainComponent = MainEntryPoint;
+    this.ReactDatepickerComponent = DatepickerEntryPoint;
 
     // 1. Берем начальные данные из стора
     this.users(vanillaStore.getState().users);

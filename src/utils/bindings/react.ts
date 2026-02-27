@@ -17,7 +17,7 @@ export const reactBindingHandler: KnockoutBindingHandler = {
     // 2. Уборка мусора (Предотвращение утечек памяти)
     // Может быть удобно в случае, если нужно условно рендерить разные React компоненты в зависимости от состояния Knockout, но при этом гарантировать, что старые компоненты будут корректно удалены и не будут занимать память
     ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-      element._reactRoot.unmount();
+      if (element._reactRoot) element._reactRoot.unmount();
     });
 
     return { controlsDescendantBindings: true };
@@ -31,16 +31,21 @@ export const reactBindingHandler: KnockoutBindingHandler = {
     // 1. Получаем конфигурацию биндинга, которая включает в себя React-компонент и его пропсы. Мы используем ko.unwrap, чтобы получить чистые значения, даже если они были определены как наблюдаемые переменные в Knockout
     const options = ko.unwrap(valueAccessor());
     const Component = options.component;
+    const deepUnwrap = options.deepUnwrap || false;
 
     // 2. Распаковываем пропсы, чтобы получить чистые данные без реактивных оберток Knockout. Это позволяет нам передавать в React-компонент обычные значения, даже если они были определены как наблюдаемые переменные в Knockout
     const reactProps: Record<string, any> = {};
-    for (const key in options.props) {
-      //reactProps[key] = ko.unwrap(options.props[key]);
-      // глубокий unwrap для вложенных объектов, чтобы React получал чистые данные без реактивных оберток Knockout
-      reactProps[key] = ko.toJS(options.props[key]);
+    if (options.props) {
+      for (const key in options.props) {
+        // глубокий unwrap для вложенных объектов, чтобы React получал чистые данные без реактивных оберток Knockout
+        reactProps[key] = deepUnwrap
+          ? ko.toJS(options.props[key])
+          : ko.unwrap(options.props[key]);
+      }
     }
 
     // 3. Рендерим компонент React внутри нашего элемента, используя ранее созданный корневой элемент. Мы передаем в компонент все распакованные пропсы, что позволяет ему корректно реагировать на изменения данных из Knockout. Здесь нельзя использовать JSX, поэтому мы используем createElement для создания элемента React и передаем ему все необходимые пропсы
-    element._reactRoot.render(createElement(Component, reactProps));
+    if (element._reactRoot)
+      element._reactRoot.render(createElement(Component, reactProps));
   },
 };
