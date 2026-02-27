@@ -9,7 +9,7 @@ interface AppState {
 }
 
 // Создаем "ванильный" стор (без привязки к React)
-export const vanillaStore = createStore<AppState>((set) => ({
+export const appStore = createStore<AppState>((set) => ({
   users: [{ id: 1, name: "Иван" }],
   addUser: (name) =>
     set((state) => ({
@@ -19,4 +19,4 @@ export const vanillaStore = createStore<AppState>((set) => ({
 
 // Создаем React-хук для этого стора
 export const useAppStore = (selector: (state: AppState) => any) =>
-  useStore(vanillaStore, selector);
+  useStore(appStore, selector);

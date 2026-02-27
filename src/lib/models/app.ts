@@ -1,6 +1,6 @@
 import { DatepickerEntryPoint } from "@/modules/datepicker";
 import { MainEntryPoint } from "@/modules/main";
-import { vanillaStore } from "@/stores/app";
+import { appStore } from "@/stores/app";
 import type { User } from "@/types/user";
 import ko from "knockout";
 import type { FC } from "react";
@@ -30,10 +30,10 @@ export class AppViewModel {
     this.ReactDatepickerComponent = DatepickerEntryPoint;
 
     // 1. Берем начальные данные из стора
-    this.users(vanillaStore.getState().users);
+    this.users(appStore.getState().users);
 
     // 2. Подписываемся на любые изменения в сторе Zustand
-    vanillaStore.subscribe((newState, prevState) => {
+    appStore.subscribe((newState, prevState) => {
       if (newState.users !== prevState.users) {
         // Если React (или кто-то еще) добавил юзера, обновляем Knockout!
         this.users(newState.users);
@@ -53,6 +53,6 @@ export class AppViewModel {
 
   // Если Knockout хочет добавить юзера, он просто дергает метод стора
   addUserFromKnockout() {
-    vanillaStore.getState().addUser("Юзер из Knockout");
+    appStore.getState().addUser("Юзер из Knockout");
   }
 }

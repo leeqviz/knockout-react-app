@@ -27,18 +27,17 @@ export function TestDatepicker({ date, setDate }: TestDatepickerProps) {
     // Оборачиваем наш реальный инпут в jQuery-объект
     const $element = $(inputRef.current);
 
+    console.log(date);
     // Инициализируем старый плагин
     $element.datepicker({
-      dateFormat: "yyyy-mm-dd",
+      dateFormat: "yy-mm-dd",
+      defaultDate: date,
       // 4. КОНТАКТ: Когда пользователь выбирает дату в jQuery,
       // мы сообщаем об этом React'у через коллбэк
       onSelect: function (dateText: string) {
         setDate(dateText);
       },
     });
-
-    // Устанавливаем начальное значение
-    $element.datepicker("setDate", date);
 
     // 5. УБОРКА (Очистка памяти):
     // Эта функция вызовется, когда React решит удалить компонент со страницы.

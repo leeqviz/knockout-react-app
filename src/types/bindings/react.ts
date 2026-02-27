@@ -1,5 +1,5 @@
-import { ElementType } from "react";
-import { Root } from "react-dom/client";
+import type { ElementType } from "react";
+import type { Root } from "react-dom/client";
 
 // 1. Расширяем стандартный HTMLElement, добавляя наш корень React
 export interface HTMLElementWithReact extends HTMLElement {
