@@ -2,9 +2,11 @@
 import "@/lib/jquery/global";
 
 // 2. ТОЛЬКО ПОТОМ загружаем плагин, теперь он найдет window.jQuery
-import $ from "jquery";
-import "jquery-ui-dist/jquery-ui.css"; // Подключаем родные стили jQuery UI
-import "jquery-ui-dist/jquery-ui.js"; // Подключаем сам jQuery UI, чтобы плагин заработал
+import $ from "jquery"; // Подключаем родные стили jQuery UI
+import "jquery-ui/themes/base/core.css";
+import "jquery-ui/themes/base/datepicker.css"; // Подключаем сам jQuery UI, чтобы плагин заработал
+import "jquery-ui/themes/base/theme.css";
+import "jquery-ui/ui/widgets/datepicker";
 import { useEffect, useRef } from "react";
 
 // 1. Описываем пропсы: что React будет передавать в наш плагин
