@@ -3,18 +3,6 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
 
-/**
- * Вам нужно настроить HTTP-заголовки на Nginx или Apache для кэширования так:
-
-Для папки assets (где лежат .js и .css файлы с хэшами):
-Cache-Control: public, max-age=31536000, immutable
-(Смело кэшировать на год! Файлы никогда не изменятся, потому что при любом изменении у них будет уже другое имя).
-
-Для входного файла (вашего HTML, который генерирует бэкенд, или index.html):
-Cache-Control: no-cache
-(Браузер всегда должен спрашивать сервер: "А не поменялся ли HTML?". Именно в HTML лежат актуальные ссылки на новые скрипты с хэшами).
- */
-
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
