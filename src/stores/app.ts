@@ -3,7 +3,7 @@ import { useStore } from "zustand";
 import { createStore } from "zustand/vanilla";
 
 // Описываем состояние
-interface AppState {
+export interface AppState {
   users: User[];
   addUser: (name: string) => void;
 }
@@ -18,5 +18,6 @@ export const appStore = createStore<AppState>((set) => ({
 }));
 
 // Создаем React-хук для этого стора
-export const useAppStore = (selector: (state: AppState) => any) =>
-  useStore(appStore, selector);
+export function useAppStore<T>(selector: (state: AppState) => T): T {
+  return useStore(appStore, selector);
+}

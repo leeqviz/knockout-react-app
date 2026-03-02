@@ -1,9 +1,12 @@
-import { DatepickerEntryPoint } from "@/modules/datepicker";
-import { MainEntryPoint } from "@/modules/main";
+import {
+  DatepickerEntryPoint,
+  type DatepickerEntryPointProps,
+} from "@/modules/datepicker";
+import { MainEntryPoint, type MainEntryPointProps } from "@/modules/main";
 import { appStore } from "@/stores/app";
 import type { User } from "@/types/user";
 import ko from "knockout";
-import type { FC } from "react";
+import type { ComponentType } from "react";
 
 // Определяем ViewModel всего приложения
 // Привязываем react компонент и наблюдаемую переменную для счетчика, чтобы knockout имел к ним доступ
@@ -13,11 +16,11 @@ export class AppViewModel {
   globalDate: KnockoutObservable<string>;
 
   // Ссылка на компонент для использования в HTML
-  ReactMainComponent: FC<any>;
-  ReactDatepickerComponent: FC<any>;
+  reactMainComponent: ComponentType<MainEntryPointProps>;
+  reactDatepickerComponent: ComponentType<DatepickerEntryPointProps>;
 
   //zustand
-  users = ko.observableArray([]) as unknown as KnockoutObservableArray<User>;
+  users = ko.observableArray([] as User[]);
 
   constructor() {
     // Создаем реактивную переменную со стартовым значением 0
@@ -26,8 +29,8 @@ export class AppViewModel {
       new Date().toISOString().split("T")[0],
     );
     // Делаем React-компонент частью ViewModel
-    this.ReactMainComponent = MainEntryPoint;
-    this.ReactDatepickerComponent = DatepickerEntryPoint;
+    this.reactMainComponent = MainEntryPoint;
+    this.reactDatepickerComponent = DatepickerEntryPoint;
 
     // 1. Берем начальные данные из стора
     this.users(appStore.getState().users);

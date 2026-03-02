@@ -40,13 +40,13 @@
     <!-- React Компонент встраивается как виджет в div через data-bind от Knockout, чтобы иметь двустороннюю привязку и обмен данными -->
     <div
       data-bind="reactMain: { 
-            component: ReactMainComponent, 
+            component: reactMainComponent, 
             props: { count: globalCount, setCount: setGlobalCount } 
         }"
     ></div>
     <div
       data-bind="reactDatepicker: { 
-            component: ReactDatepickerComponent, 
+            component: reactDatepickerComponent, 
             props: { date: globalDate, setDate: setGlobalDate } 
         }"
     ></div>

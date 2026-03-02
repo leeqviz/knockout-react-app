@@ -32,7 +32,7 @@ export const reactBindingHandler: KnockoutBindingHandler = {
     const options = ko.unwrap(valueAccessor());
 
     // 2. Распаковываем пропсы, чтобы получить чистые данные без реактивных оберток Knockout. Это позволяет нам передавать в React-компонент обычные значения, даже если они были определены как наблюдаемые переменные в Knockout
-    const reactProps: Record<string, any> = {};
+    const reactProps: Record<string, unknown> = {};
     if (options.props) {
       for (const key in options.props) {
         // глубокий unwrap для вложенных объектов, чтобы React получал чистые данные без реактивных оберток Knockout

@@ -2,7 +2,7 @@ import { ErrorBoundary } from "@/shared/react/components/error-boundary";
 import { TestInput } from "./components/test-input";
 import UsersList from "./components/users-list";
 
-interface MainEntryPointProps {
+export interface MainEntryPointProps {
   count: number;
   setCount: (value: number) => void;
 }

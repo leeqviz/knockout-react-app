@@ -27,7 +27,6 @@ export function TestDatepicker({ date, setDate }: TestDatepickerProps) {
     // Оборачиваем наш реальный инпут в jQuery-объект
     const $element = $(inputRef.current);
 
-    console.log(date);
     // Инициализируем старый плагин
     $element.datepicker({
       dateFormat: "yy-mm-dd",
@@ -46,6 +45,7 @@ export function TestDatepicker({ date, setDate }: TestDatepickerProps) {
       // иначе он останется висеть в памяти браузера!
       $element.datepicker("destroy");
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // <-- Пустой массив зависимостей означает "выполнить только при монтировании"
 
   // 6. СИНХРОНИЗАЦИЯ (React -> jQuery)
