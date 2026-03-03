@@ -14,15 +14,6 @@
     "format:write": "prettier --write .",
     "prepare": "husky"
   },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,mjs}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,css,md,html}": [
-      "prettier --write"
-    ]
-  },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
@@ -47,8 +38,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^15.15.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.3.1",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
