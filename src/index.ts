@@ -7,5 +7,3 @@ import './lib/bindings/main'; // Инициализируем наш мост д
 
 // Запускаем Knockout
 ko.applyBindings(new AppViewModel());
-
-const a: any = 123;
