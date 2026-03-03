@@ -1,5 +1,5 @@
+import '@/index.css';
 import ko from 'knockout';
-import './index.css';
 import { AppViewModel } from './lib/models/app';
 
 import './lib/bindings/datepicker'; // Инициализируем наш мост для datepicker
