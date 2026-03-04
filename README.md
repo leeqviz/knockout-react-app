@@ -45,9 +45,10 @@ A custom binding mechanism is used to render React components within an applicat
 ```text
 ├── public/
 ├── src/
-│ ├── components/
-│ ├── lib/
-│ ├── modules/
+│ ├── components/ # shared React components
+│ ├── hooks/ # shared React hooks
+│ ├── lib/ # binding logic and view models for Knockout.js
+│ ├── modules/ # independent React modules
 │ ├── stores/
 │ ├── tests/
 │ ├── types/
