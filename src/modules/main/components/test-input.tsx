@@ -8,9 +8,9 @@ interface TestInputProps {
 export function TestInput({ count, setCount }: TestInputProps) {
   return (
     <div className={styles['container']}>
-      <h3 className={styles['title']}>React Компонент ⚛️</h3>
+      <h3 className={styles['title']}>React component ⚛️</h3>
       <p>
-        Значение из Knockout: <strong>{count}</strong>
+        Linked with Knockout: <strong>{count}</strong>
       </p>
       <input
         type="number"

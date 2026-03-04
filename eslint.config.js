@@ -2,10 +2,11 @@ import js from '@eslint/js';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default [
+export default defineConfig([
   { ignores: ['dist', 'node_modules', 'build'] },
 
   js.configs.recommended,
@@ -53,4 +54,4 @@ export default [
       react: { version: 'detect' },
     },
   },
-];
+]);

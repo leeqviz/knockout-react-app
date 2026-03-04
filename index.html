@@ -2,25 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Knockout app</title>
   </head>
   <body>
-    <div class="old-knockout-app">
-      <h2>Приложение на Knockout</h2>
-      <p class="ko-data">
-        Выбранная дата: <strong data-bind="text: globalDate"></strong>
+    <div class="knockout-app">
+      <h2>Knockout app</h2>
+      <p class="knockout-data">
+        Global date: <strong data-bind="text: globalDate"></strong>
       </p>
-      <p>Значение из React: <strong data-bind="text: globalCount"></strong></p>
-      <!-- value: globalCount - связываем значение с глобальной переменной (двусторонняя привязка),
-       valueUpdate: 'input' - обновляем значение при вводе, а не при выходе из инпута (blur) -->
+      <p>Global count: <strong data-bind="text: globalCount"></strong></p>
       <input
         data-bind="value: globalCount, valueUpdate: 'input'"
         type="number"
       />
     </div>
     <br />
-    <!-- React Компонент встраивается как виджет в div через data-bind от Knockout, чтобы иметь двустороннюю привязку и обмен данными -->
     <div
       data-bind="reactMain: { 
             component: reactMainComponent, 
@@ -33,7 +31,6 @@
             props: { date: globalDate, setDate: setGlobalDate } 
         }"
     ></div>
-    <!-- Инициализация Knockout как оболочки -->
     <script type="module" src="/src/index.ts"></script>
   </body>
 </html>

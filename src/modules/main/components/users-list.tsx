@@ -1,7 +1,6 @@
 import { useAppStore } from '@/hooks/state-management';
 
 export function UsersList() {
-  // Подписываемся на пользователей
   const users = useAppStore((state) => state.users);
   const addUser = useAppStore((state) => state.addUser);
 
@@ -10,7 +9,12 @@ export function UsersList() {
       {users.map((u) => (
         <div key={u.id}>{u.name}</div>
       ))}
-      <button onClick={() => addUser('Новый юзер')}>Добавить</button>
+      <button
+        className="border border-blue-500"
+        onClick={() => addUser('New User')}
+      >
+        Add user
+      </button>
     </div>
   );
 }
