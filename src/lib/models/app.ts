@@ -1,12 +1,13 @@
 import {
   DatepickerEntryPointLazy,
   type DatepickerEntryPointProps,
-} from "@/modules/datepicker";
-import { MainEntryPointLazy, type MainEntryPointProps } from "@/modules/main";
-import { appStore } from "@/stores/app";
-import type { User } from "@/types/user";
-import ko from "knockout";
-import type { ComponentType } from "react";
+} from '@/modules/datepicker';
+import { MainEntryPointLazy, type MainEntryPointProps } from '@/modules/main';
+import { appStore } from '@/stores/app';
+import type { User } from '@/types/user';
+import { getCurrentISODate } from '@/utils/mappers/date';
+import ko from 'knockout';
+import type { ComponentType } from 'react';
 
 // Определяем ViewModel всего приложения
 // Привязываем react компонент и наблюдаемую переменную для счетчика, чтобы knockout имел к ним доступ
@@ -25,9 +26,7 @@ export class AppViewModel {
   constructor() {
     // Создаем реактивную переменную со стартовым значением 0
     this.globalCount = ko.observable<number>(0);
-    this.globalDate = ko.observable<string>(
-      new Date().toISOString().split("T")[0],
-    );
+    this.globalDate = ko.observable<string>(getCurrentISODate());
     // Делаем React-компонент частью ViewModel
     this.reactMainComponent = MainEntryPointLazy;
     this.reactDatepickerComponent = DatepickerEntryPointLazy;
@@ -56,6 +55,6 @@ export class AppViewModel {
 
   // Если Knockout хочет добавить юзера, он просто дергает метод стора
   addUserFromKnockout() {
-    appStore.getState().addUser("Юзер из Knockout");
+    appStore.getState().addUser('Юзер из Knockout');
   }
 }

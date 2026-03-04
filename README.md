@@ -38,7 +38,7 @@ A custom binding mechanism is used to render React components within an applicat
 
 2. Lazy Loading (Code Splitting). Create a wrapper file: `[WidgetName].lazy.tsx` using `React.lazy` and `Suspense`. Import the lazy wrapper into the ViewModel, not the widget itself.
 
-3. Working with jQuery within React. If you need to wrap a jQuery plugin (for example, Datepicker) in a React component: Be sure to import global initialization: `import './jquery-global'`; Use `useRef` to bind to the DOM element to delegate rendering to jQuery and easily track changes in React.
+3. Working with jQuery within React. If you need to wrap a jQuery plugin (for example, Datepicker) in a React component: Be sure to import global initialization. Use `useRef` to bind to the DOM element to delegate rendering to jQuery and easily track changes in React.
 
 ## 📂 Project structure
 
