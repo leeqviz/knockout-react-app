@@ -41,6 +41,7 @@ export default [
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      ...react.configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
@@ -50,8 +51,11 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        { argsIgnorePattern: '^_' },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+    },
+    settings: {
+      react: { version: 'detect' },
     },
   },
 ];
