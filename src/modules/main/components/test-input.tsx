@@ -1,4 +1,4 @@
-import styles from "./test-input.module.css";
+import styles from './test-input.module.css';
 
 interface TestInputProps {
   count: number;
@@ -7,15 +7,15 @@ interface TestInputProps {
 
 export function TestInput({ count, setCount }: TestInputProps) {
   return (
-    <div className={styles.container}>
-      <h3 className={styles.title}>React Компонент ⚛️</h3>
+    <div className={styles['container']}>
+      <h3 className={styles['title']}>React Компонент ⚛️</h3>
       <p>
         Значение из Knockout: <strong>{count}</strong>
       </p>
       <input
         type="number"
         value={count}
-        className={styles.button}
+        className={styles['button']}
         onChange={(e) => setCount(e.target.valueAsNumber)}
       />
     </div>
