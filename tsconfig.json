@@ -5,26 +5,26 @@
 
     // interop constraints options
     "isolatedModules": true,
-    "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
 
     // emit options
     "noEmit": true,
 
     // language and environment options
-    "jsx": "react-jsx",
     "target": "ES2022",
-    "useDefineForClassFields": true,
+    "jsx": "react-jsx",
     "moduleDetection": "force",
+    "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
 
     // modules options
     "module": "ESNext",
-    "moduleResolution": "bundler",
-    "noUncheckedSideEffectImports": true,
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
@@ -32,13 +32,13 @@
 
     // type checking options
     "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
+    "noImplicitReturns": true,
     "noUnusedParameters": true,
     "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": true
   }
 }

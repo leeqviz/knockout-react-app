@@ -10,7 +10,7 @@ const LazyMainEntryPoint = lazy(() =>
 
 export function MainEntryPointLazy(props: MainEntryPointProps) {
   return (
-    <Suspense fallback={LazyLoadingFallback()}>
+    <Suspense fallback={<LazyLoadingFallback />}>
       <LazyMainEntryPoint {...props} />
     </Suspense>
   );

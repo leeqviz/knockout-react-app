@@ -11,14 +11,11 @@ export default defineConfig({
     },
   },
   build: {
-    // Настраиваем Rollup (движок сборки под капотом Vite)
     rollupOptions: {
       output: {
-        // Функция ручной нарезки чанков
+        // splits (if possible) React, jQuery, Knockout and Zustand into separate chunks to optimize caching and loading
         manualChunks: {
-          // Выделяем React и сопутствующие библиотеки в чанк 'react-vendor'
           'react-vendor': ['react', 'react-dom'],
-          // Выделяем jQuery в отдельный чанк
           'jquery-vendor': ['jquery', 'jquery-ui'],
           'knockout-vendor': ['knockout'],
           'zustand-vendor': ['zustand'],

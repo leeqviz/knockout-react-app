@@ -1,26 +1,24 @@
 import ko from 'knockout';
-import type { ElementType } from 'react';
-import { createElement } from 'react';
-import type { Root } from 'react-dom/client';
-import { createRoot } from 'react-dom/client';
+import { createElement, type ElementType } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
 
-// 1. Расширяем стандартный HTMLElement, добавляя наш корень React
-export interface HTMLElementWithReact extends HTMLElement {
-  _reactRoot?: Root;
+// Extends HTMLElement to add _reactRoot property
+export interface ReactRootHTMLElement extends HTMLElement {
+  _reactRoot?: Root | undefined;
 }
 
-// 2. Описываем, что мы ждем в конфигурации биндинга
+// Custom binding configuration
 export interface ReactBindingOptions {
-  component?: ElementType;
-  props?: Record<string, unknown>;
-  deepUnwrap?: boolean; // если true, будет выполнен глубокий unwrap для всех пропсов, что полезно для сложных объектов и массивов, чтобы React получал чистые данные без реактивных оберток Knockout
+  component?: ElementType | undefined;
+  props?: Record<string, unknown> | undefined;
+  deepUnwrap?: boolean | undefined; // for deep unwrapping of nested observables, if needed
 }
 
 export const reactBindingHandler: KnockoutBindingHandler = {
   // 3. Инициализация биндинга: создаем корневой элемент React и обеспечиваем его очистку при удалении узла
   // controlsDescendantBindings: true говорит Knockout, что внутри этого элемента мы будем управлять всем рендерингом, и он не должен пытаться обрабатывать дочерние элементы
   // Данный метод вызывается один раз при связывании элемента с данным биндингом и позволяет нам подготовить элемент для рендеринга React-компонента
-  init: function (element: HTMLElementWithReact) {
+  init: function (element: ReactRootHTMLElement) {
     // 1. Создаем корень React на данном элементе и сохраняем его в специальном свойстве, чтобы потом иметь к нему доступ для рендеринга и очистки
     element._reactRoot = createRoot(element);
 
@@ -35,7 +33,7 @@ export const reactBindingHandler: KnockoutBindingHandler = {
 
   // 4. Обновление биндинга: рендерим React-компонент с новыми пропсами при каждом изменении наблюдаемых переменных. Функция valueAccessor возвращает то, что написано в HTML (наш объект с component и props). Мы пропускаем его через ko.unwrap(), на случай если сам конфигурационный объект тоже оказался реактивным.
   update: function (
-    element: HTMLElementWithReact,
+    element: ReactRootHTMLElement,
     valueAccessor: () => ReactBindingOptions, // possibly any value
   ) {
     // 1. Получаем конфигурацию биндинга, которая включает в себя React-компонент и его пропсы. Мы используем ko.unwrap, чтобы получить чистые значения, даже если они были определены как наблюдаемые переменные в Knockout
