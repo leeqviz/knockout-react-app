@@ -1,10 +1,9 @@
 import ko from 'knockout';
 import './index.css';
-import { reactBindingHandler } from './lib/bindings/react';
-import { datepickerComponent } from './lib/components/datepicker';
-import { mainComponent } from './lib/components/main';
-
-import { AppViewModel } from './lib/models/app';
+import { reactBindingHandler } from './lib/ko/bindings/react';
+import { datepickerComponent } from './lib/ko/components/datepicker';
+import { mainComponent } from './lib/ko/components/main';
+import { AppViewModel } from './lib/ko/models/app';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Root element not found');

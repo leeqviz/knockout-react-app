@@ -1,4 +1,4 @@
-import { LazyLoadingFallback } from '@/components/lazy-loading-fallback';
+import { LazyLoadingFallback } from '@/lib/react/components/lazy-loading-fallback';
 import { lazy, Suspense } from 'react';
 import type { DatepickerEntryPointProps } from './entry-point';
 

@@ -1,4 +1,4 @@
-import { appEventBus } from '../subscirabales/event-bus';
+import { appEventBus } from '../event-bus';
 
 //TODO использовать если потребуется
 export class LegacyAppViewModel {

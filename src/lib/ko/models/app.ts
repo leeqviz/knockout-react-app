@@ -1,4 +1,4 @@
-import { appStore } from '@/stores/app';
+import { appStore, type AppState } from '@/stores/app';
 import type { User } from '@/types/user';
 import { getCurrentISODate } from '@/utils/mappers/date';
 import ko from 'knockout';
@@ -17,16 +17,6 @@ export class AppViewModel {
   //TODO можно вложить несколько других моделей и использовать их в html через биндинг with
 
   constructor() {
-    // TODO вынести логику сохранения в localStorage в zustand persist
-    this.theme = ko.observable(appStore.getState().theme).extend({
-      persist: 'app_theme',
-      zustandSync: {
-        store: appStore,
-        selector: (state: any) => state.theme, // Как читать из Zustand
-        updater: (newTheme: any) => appStore.getState().setTheme(newTheme), // Как писать в Zustand
-      },
-    });
-
     // Initialize observables with default values
     this.globalCount = ko.observable<number>(0);
     this.globalDate = ko.observable<string>(getCurrentISODate());
@@ -36,6 +26,17 @@ export class AppViewModel {
     this.result = ko.pureComputed(
       () => this.globalCount() + ' ' + this.globalDate(),
     );
+
+    // TODO вынести логику сохранения в localStorage в zustand persist
+    this.theme = ko.observable(appStore.getState().theme).extend({
+      persist: 'app_theme',
+      zustandSync: {
+        store: appStore,
+        selector: (state: AppState) => state.theme, // Как читать из Zustand
+        updater: (newTheme: 'light' | 'dark') =>
+          appStore.getState().setTheme(newTheme), // Как писать в Zustand
+      },
+    });
 
     // Subscribe to the app store to keep Knockout state in sync with React state
     appStore.subscribe((newState, prevState) => {

@@ -1,7 +1,14 @@
 import ko from 'knockout';
+import type { StoreApi } from 'zustand';
 
-//TODO проверить как работает
-ko.extenders.zustandSync = function (target, options) {
+ko.extenders.zustandSync = function (
+  target: KnockoutObservable<unknown>,
+  options: {
+    store: StoreApi<unknown>;
+    selector: (state: unknown) => unknown;
+    updater: (newValue: unknown) => void;
+  },
+) {
   const { store, selector, updater } = options;
 
   // Флаг для предотвращения бесконечного эха (цикла)
@@ -9,17 +16,19 @@ ko.extenders.zustandSync = function (target, options) {
 
   // 1. Подписка: Zustand -> Knockout
   // store.subscribe в ванильном Zustand срабатывает при любом изменении стора
-  const unsubscribeZustand = store.subscribe((state: any, prevState: any) => {
-    const newValue = selector(state);
-    const oldValue = selector(prevState);
+  const unsubscribeZustand = store.subscribe(
+    (state: unknown, prevState: unknown) => {
+      const newValue = selector(state);
+      const oldValue = selector(prevState);
 
-    // Если нужное нам значение реально изменилось и отличается от текущего в KO
-    if (newValue !== oldValue && target() !== newValue) {
-      isUpdatingFromZustand = true;
-      target(newValue); // Обновляем Knockout
-      isUpdatingFromZustand = false;
-    }
-  });
+      // Если нужное нам значение реально изменилось и отличается от текущего в KO
+      if (newValue !== oldValue && target() !== newValue) {
+        isUpdatingFromZustand = true;
+        target(newValue); // Обновляем Knockout
+        isUpdatingFromZustand = false;
+      }
+    },
+  );
 
   // 2. Подписка: Knockout -> Zustand
   const koSubscription = target.subscribe((newValue) => {

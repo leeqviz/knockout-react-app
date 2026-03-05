@@ -1,4 +1,4 @@
-import { DatepickerViewModel } from '@/lib/models/datepicker';
+import { DatepickerViewModel } from '@/lib/ko/models/datepicker';
 
 export const datepickerComponent = {
   viewModel: DatepickerViewModel,

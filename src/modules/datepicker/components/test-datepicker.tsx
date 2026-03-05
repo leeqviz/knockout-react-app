@@ -1,4 +1,4 @@
-import '@/lib/globals/jquery';
+import '@/lib/jquery/globals';
 // important
 import $ from 'jquery';
 import 'jquery-ui/themes/base/core.css';
