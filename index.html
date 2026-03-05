@@ -22,17 +22,16 @@
         <ul data-bind="foreach: globalUsers">
           <li data-bind="text: name"></li>
         </ul>
+        <p>Computed result: <strong data-bind="text: result"></strong></p>
       </div>
-      <main-widget
-        id="main-widget"
-        class="react-widget"
+      <main-component
+        class="react-component"
         params="{ globals: $root }"
-      ></main-widget>
-      <datepicker-widget
-        id="datepicker-widget"
-        class="react-widget"
+      ></main-component>
+      <datepicker-component
+        class="react-component"
         params="{ globals: $root }"
-      ></datepicker-widget>
+      ></datepicker-component>
     </div>
     <script type="module" src="/src/index.ts"></script>
   </body>

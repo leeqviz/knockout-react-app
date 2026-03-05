@@ -1,7 +1,6 @@
 import { DatepickerViewModel } from '@/lib/models/datepicker';
-import ko from 'knockout';
 
-ko.components.register('datepicker-widget', {
+export const datepickerComponent = {
   viewModel: DatepickerViewModel,
   template: /*html*/ `
     <div
@@ -11,4 +10,4 @@ ko.components.register('datepicker-widget', {
         }"
       ></div>
     `,
-});
+};

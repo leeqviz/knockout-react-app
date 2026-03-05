@@ -1,7 +1,6 @@
 import { MainViewModel } from '@/lib/models/main';
-import ko from 'knockout';
 
-ko.components.register('main-widget', {
+export const mainComponent = {
   viewModel: MainViewModel,
   template: /*html*/ `
     <div
@@ -11,4 +10,4 @@ ko.components.register('main-widget', {
         }"
       ></div>
     `,
-});
+};

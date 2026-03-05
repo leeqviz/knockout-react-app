@@ -9,12 +9,33 @@ export class AppViewModel {
   public globalCount: KnockoutObservable<number>;
   public globalDate: KnockoutObservable<string>;
   public globalUsers: KnockoutObservableArray<User>;
+  public result: KnockoutComputed<string>;
+
+  // test extenders
+  public theme: KnockoutObservable<'light' | 'dark'>;
+
+  //TODO можно вложить несколько других моделей и использовать их в html через биндинг with
 
   constructor() {
+    // TODO вынести логику сохранения в localStorage в zustand persist
+    this.theme = ko.observable(appStore.getState().theme).extend({
+      persist: 'app_theme',
+      zustandSync: {
+        store: appStore,
+        selector: (state: any) => state.theme, // Как читать из Zustand
+        updater: (newTheme: any) => appStore.getState().setTheme(newTheme), // Как писать в Zustand
+      },
+    });
+
     // Initialize observables with default values
     this.globalCount = ko.observable<number>(0);
     this.globalDate = ko.observable<string>(getCurrentISODate());
     this.globalUsers = ko.observableArray(appStore.getState().users);
+
+    // Pure Computed observable is better than computed observable
+    this.result = ko.pureComputed(
+      () => this.globalCount() + ' ' + this.globalDate(),
+    );
 
     // Subscribe to the app store to keep Knockout state in sync with React state
     appStore.subscribe((newState, prevState) => {
@@ -28,6 +49,12 @@ export class AppViewModel {
     this.setGlobalCount = this.setGlobalCount.bind(this);
     this.setGlobalDate = this.setGlobalDate.bind(this);
     this.addGlobalUser = this.addGlobalUser.bind(this);
+  }
+
+  public dispose() {
+    // Если эта модель уничтожается (например, скрывается через if),
+    // обязательно очищаем подписки, чтобы сборщик мусора очистил память.
+    this.theme.disposeZustandSync?.();
   }
 
   public setGlobalCount(value: number) {

@@ -17,7 +17,7 @@ body {
   border-radius: 5px;
   margin-bottom: 20px;
 }
-.react-widget,
-.react-widget > :first-child {
+.react-component,
+.react-component > :first-child {
   display: contents;
 }

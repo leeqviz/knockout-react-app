@@ -1,16 +1,24 @@
 import ko from 'knockout';
 import './index.css';
 import { reactBindingHandler } from './lib/bindings/react';
-import './lib/components/datepicker';
-import './lib/components/main';
+import { datepickerComponent } from './lib/components/datepicker';
+import { mainComponent } from './lib/components/main';
+
 import { AppViewModel } from './lib/models/app';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Root element not found');
 
-// apply react binding handlers to knockout
+// apply knockout components
+ko.components.register('main-component', mainComponent);
+ko.components.register('datepicker-component', datepickerComponent);
+
+// apply knockout bindings
 ko.bindingHandlers['reactMain'] = reactBindingHandler;
 ko.bindingHandlers['reactDatepicker'] = reactBindingHandler;
+
+// apply knockout async rendering
+ko.options.deferUpdates = true;
 
 // apply bindings for app viewModel
 ko.applyBindings(new AppViewModel(), rootElement);
