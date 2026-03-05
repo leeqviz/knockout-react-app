@@ -2,11 +2,11 @@ import type { StoreApi } from 'zustand';
 
 declare global {
   interface KnockoutExtenders {
-    persist(
+    localStorage(
       target: KnockoutObservable<unknown>,
       key: string,
     ): KnockoutObservable<unknown>;
-    zustandSync(
+    globalStore(
       target: KnockoutObservable<unknown>,
       options: {
         store: StoreApi<unknown>;
@@ -14,11 +14,5 @@ declare global {
         updater: (newValue: unknown) => void;
       },
     ): KnockoutObservable<unknown>;
-  }
-  interface KnockoutObservable<T> {
-    disposeZustandSync?: () => void;
-  }
-  interface KnockoutComputed<T> {
-    disposeZustandSync?: () => void;
   }
 }

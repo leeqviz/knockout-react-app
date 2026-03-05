@@ -1,6 +1,6 @@
 import ko from 'knockout';
 
-ko.extenders.persist = function (
+ko.extenders.localStorage = function (
   target: KnockoutObservable<unknown>,
   key: string,
 ) {

@@ -20,5 +20,5 @@ ko.bindingHandlers['reactDatepicker'] = reactBindingHandler;
 ko.options.deferUpdates = true;
 
 // apply bindings for app viewModel
-ko.applyBindings(new AppViewModel(), rootElement);
+ko.applyBindings(new AppViewModel(rootElement), rootElement);
 // we can also add more view models to other elements by id, but this elements should not be nested

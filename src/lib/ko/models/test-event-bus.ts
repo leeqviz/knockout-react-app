@@ -1,6 +1,6 @@
 import { appEventBus } from '../event-bus';
 
-//TODO использовать если потребуется
+//TODO refactor
 export class LegacyAppViewModel {
   private eventSubscription: KnockoutSubscription;
 

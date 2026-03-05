@@ -1,14 +1,14 @@
 import ko from 'knockout';
 import type { StoreApi } from 'zustand';
 
-ko.extenders.zustandSync = function (
+ko.extenders.globalStore = function (
   target: KnockoutObservable<unknown>,
   options: {
     store: StoreApi<unknown>;
     selector: (state: unknown) => unknown;
     updater: (newValue: unknown) => void;
   },
-) {
+): KnockoutObservable<unknown> & { dispose: () => void } {
   const { store, selector, updater } = options;
 
   // Флаг для предотвращения бесконечного эха (цикла)
@@ -41,10 +41,11 @@ ko.extenders.zustandSync = function (
 
   // 3. Защита от утечек памяти
   // Добавляем метод очистки прямо в observable, чтобы можно было отписаться при удалении модели
-  target.disposeZustandSync = function () {
-    unsubscribeZustand();
-    koSubscription.dispose();
-  };
+  (target as KnockoutObservable<unknown> & { dispose: () => void }).dispose =
+    function () {
+      unsubscribeZustand();
+      koSubscription.dispose();
+    };
 
-  return target; // Возвращаем обогащенный observable
+  return target as KnockoutObservable<unknown> & { dispose: () => void }; // Возвращаем обогащенный observable
 };

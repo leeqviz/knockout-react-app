@@ -12,11 +12,11 @@ export class AppViewModel {
   public result: KnockoutComputed<string>;
 
   // test extenders
-  public theme: KnockoutObservable<'light' | 'dark'>;
+  public theme: KnockoutObservable<'light' | 'dark'> & { dispose?: () => void };
 
   //TODO можно вложить несколько других моделей и использовать их в html через биндинг with
 
-  constructor() {
+  constructor(element: HTMLElement) {
     // Initialize observables with default values
     this.globalCount = ko.observable<number>(0);
     this.globalDate = ko.observable<string>(getCurrentISODate());
@@ -29,8 +29,8 @@ export class AppViewModel {
 
     // TODO вынести логику сохранения в localStorage в zustand persist
     this.theme = ko.observable(appStore.getState().theme).extend({
-      persist: 'app_theme',
-      zustandSync: {
+      localStorage: 'app_theme',
+      globalStore: {
         store: appStore,
         selector: (state: AppState) => state.theme, // Как читать из Zustand
         updater: (newTheme: 'light' | 'dark') =>
@@ -50,12 +50,10 @@ export class AppViewModel {
     this.setGlobalCount = this.setGlobalCount.bind(this);
     this.setGlobalDate = this.setGlobalDate.bind(this);
     this.addGlobalUser = this.addGlobalUser.bind(this);
-  }
 
-  public dispose() {
-    // Если эта модель уничтожается (например, скрывается через if),
-    // обязательно очищаем подписки, чтобы сборщик мусора очистил память.
-    this.theme.disposeZustandSync?.();
+    ko.utils.domNodeDisposal.addDisposeCallback(element, () => {
+      this.theme.dispose?.();
+    });
   }
 
   public setGlobalCount(value: number) {

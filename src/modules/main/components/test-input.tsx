@@ -6,7 +6,7 @@ interface TestInputProps {
 }
 
 export function TestInput({ count, setCount }: TestInputProps) {
-  //TODO event bus
+  //TODO use event bus subscription in useEffect with cleanup and notification in handler
   /* const handleLogoutClick = () => {
         // Отправляем событие всем, кто на него подписан.
         // 1-й аргумент: данные (payload), которые мы хотим передать
