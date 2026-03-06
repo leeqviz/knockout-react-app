@@ -17,4 +17,6 @@ export class DatepickerViewModel {
     };
     this.component = DatepickerEntryPointLazy;
   }
+
+  public dispose() {}
 }

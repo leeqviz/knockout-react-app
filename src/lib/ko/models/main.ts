@@ -14,4 +14,6 @@ export class MainViewModel {
     };
     this.component = MainEntryPointLazy;
   }
+
+  public dispose() {}
 }
