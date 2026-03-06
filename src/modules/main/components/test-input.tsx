@@ -1,3 +1,5 @@
+import { appEventBus } from '@/lib/ko/event-bus';
+import { useEffect } from 'react';
 import styles from './test-input.module.css';
 
 interface TestInputProps {
@@ -6,16 +8,15 @@ interface TestInputProps {
 }
 
 export function TestInput({ count, setCount }: TestInputProps) {
-  //TODO use event bus subscription in useEffect with cleanup and notification in handler
-  /* const handleLogoutClick = () => {
-        // Отправляем событие всем, кто на него подписан.
-        // 1-й аргумент: данные (payload), которые мы хотим передать
-        // 2-й аргумент: имя канала/события (должно совпадать с тем, что в subscribe)
-        appEventBus.notifySubscribers(
-            { modalId: 'logoutConfirm', message: 'Вы уверены, что хотите выйти?' }, 
-            "OPEN_LEGACY_MODAL"
-        );
-    }; */
+  useEffect(() => {
+    // Подписка на шину событий Knockout при монтировании React-компонента
+    appEventBus.publish('REACT_COMPONENT_READY', { componentId: 'test' });
+
+    // Функция очистки (cleanup function) вызывается React при размонтировании
+    return () => {
+      //subscription.dispose();
+    };
+  }, []);
 
   return (
     <div className={styles['container']}>

@@ -2,6 +2,7 @@ import { appStore, type AppState } from '@/stores/app';
 import type { User } from '@/types/user';
 import { getCurrentISODate } from '@/utils/mappers/date';
 import ko from 'knockout';
+import { appEventBus, type ApplicationEventMap } from '../event-bus';
 
 // ViewModel as a shell for the entire application
 export class AppViewModel {
@@ -13,6 +14,8 @@ export class AppViewModel {
 
   // test extenders
   public theme: KnockoutObservable<'light' | 'dark'> & { dispose?: () => void };
+
+  private eventSubscription: KnockoutSubscription;
 
   //TODO можно вложить несколько других моделей и использовать их в html через биндинг with
 
@@ -35,6 +38,13 @@ export class AppViewModel {
         this.globalUsers(newState.users);
       }
     }); */
+
+    // Подписываемся на конкретное событие (третий аргумент — имя канала/события)
+    this.eventSubscription = appEventBus.subscribe(
+      'REACT_COMPONENT_READY', // Имя события
+      this.logToConsole, // Функция обработчик
+      this, // Контекст (this)
+    );
 
     // Pure Computed observable is better than computed observable
     this.result = ko.pureComputed(
@@ -59,8 +69,17 @@ export class AppViewModel {
 
     ko.utils.domNodeDisposal.addDisposeCallback(element, () => {
       this.theme.dispose?.();
+      this.eventSubscription.dispose();
     });
   }
+
+  // Обязательно используем стрелочную функцию, чтобы не потерять контекст
+  private logToConsole = (
+    payload: ApplicationEventMap['REACT_COMPONENT_READY'],
+  ) => {
+    console.log(`Component is ready: ${payload.componentId}`);
+    // Здесь логика старого jQuery/Knockout модала
+  };
 
   public setGlobalCount(value: number) {
     this.globalCount(value);
