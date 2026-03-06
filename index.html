@@ -8,6 +8,10 @@
   </head>
   <body>
     <div id="root">
+      <a href="/" data-bind="router: true">Главная</a>
+      <a href="/test/42" data-bind="router: true">Профиль 42</a>
+
+      <button data-bind="click: () => navigate('/test/99')">Профиль 99</button>
       <div class="knockout-app">
         <h2>Knockout app</h2>
         <p class="knockout-data">
@@ -24,6 +28,12 @@
         </ul>
         <p>Computed result: <strong data-bind="text: result"></strong></p>
       </div>
+      <main
+        data-bind="component: {
+        name: currentPageComponent,
+        params: { globals: $root, route: currentRouteParams }
+      }"
+      ></main>
       <main-component
         class="react-component"
         params="{ globals: $root }"

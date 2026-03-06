@@ -9,10 +9,11 @@ export class DatepickerViewModel {
   public props: unknown;
   public component: ComponentType<DatepickerEntryPointProps>;
 
-  constructor(params: { globals: AppViewModel }) {
+  constructor(params: { globals: AppViewModel; route: unknown }) {
     this.props = {
       date: params.globals.globalDate,
       setDate: params.globals.setGlobalDate,
+      route: params.route,
     };
     this.component = DatepickerEntryPointLazy;
   }

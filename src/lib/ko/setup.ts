@@ -1,5 +1,6 @@
 import ko from 'knockout';
 import { reactBindingHandler } from './bindings/react';
+import { routerBindingHandler } from './bindings/router';
 import { localStorageSync } from './extenders/local-storage-sync';
 import { storeSync } from './extenders/store-sync';
 import { storeSyncArray } from './extenders/store-sync-array';
@@ -31,6 +32,7 @@ ko.components.register('datepicker-component', {
 });
 
 // apply knockout bindings
+ko.bindingHandlers['router'] = routerBindingHandler;
 ko.bindingHandlers['reactMain'] = reactBindingHandler;
 ko.bindingHandlers['reactDatepicker'] = reactBindingHandler;
 
