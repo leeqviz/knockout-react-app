@@ -13,5 +13,3 @@ export const datepickerComponent: KnockoutComponentTypes.Config<
       ></div>
     `,
 };
-
-export default datepickerComponent;

@@ -13,5 +13,3 @@ export const mainComponent: KnockoutComponentTypes.Config<
       ></div>
     `,
 };
-
-export default mainComponent;

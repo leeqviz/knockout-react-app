@@ -31,15 +31,19 @@ declare global {
   namespace KnockoutComponentTypes {
     interface Config<T> {
       viewModel?: T | undefined;
-      lazy?: () => Promise<{
-        default: Config<T>;
-      }>;
+      lazy?:
+        | (() => Promise<{
+            default?: Config<T> | undefined;
+          }>)
+        | undefined;
     }
     interface ComponentConfig<T> {
       viewModel?: T | undefined;
-      lazy?: () => Promise<{
-        default: ComponentConfig<T>;
-      }>;
+      lazy?:
+        | (() => Promise<{
+            default?: ComponentConfig<T> | undefined;
+          }>)
+        | undefined;
     }
   }
 }

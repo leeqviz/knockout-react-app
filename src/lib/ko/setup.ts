@@ -25,10 +25,14 @@ ko.components.loaders.unshift(lazyComponentLoader);
 //ko.components.register('main-component', mainComponent);
 //ko.components.register('datepicker-component', datepickerComponent);
 ko.components.register('main-component', {
-  lazy: () => import('./components/main'),
+  lazy: () =>
+    import('./components/main').then((res) => ({ default: res.mainComponent })),
 });
 ko.components.register('datepicker-component', {
-  lazy: () => import('./components/datepicker'),
+  lazy: () =>
+    import('./components/datepicker').then((res) => ({
+      default: res.datepickerComponent,
+    })),
 });
 
 // apply knockout bindings
