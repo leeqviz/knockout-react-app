@@ -9,10 +9,8 @@ interface TestInputProps {
 
 export function TestInput({ count, setCount }: TestInputProps) {
   useEffect(() => {
-    // Подписка на шину событий Knockout при монтировании React-компонента
     appEventBus.publish('REACT_COMPONENT_READY', { componentId: 'test' });
 
-    // Функция очистки (cleanup function) вызывается React при размонтировании
     return () => {
       //subscription.dispose();
     };

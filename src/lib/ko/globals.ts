@@ -9,7 +9,7 @@ export interface StoreSyncConfig<TState, TSlice> {
 export interface StoreSyncArrayConfig<TState, TSlice> {
   store: StoreApi<TState>;
   selector: (state: TState) => TSlice[];
-  setter?: (newValue: TSlice[]) => Partial<TState> | void;
+  setter?: ((newValue: TSlice[]) => Partial<TState> | void) | undefined;
 }
 
 declare global {

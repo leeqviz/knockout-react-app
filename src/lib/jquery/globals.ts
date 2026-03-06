@@ -8,5 +8,3 @@ declare global {
 }
 window.$ = jquery;
 window.jQuery = jquery;
-
-export default jquery;

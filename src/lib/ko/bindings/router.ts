@@ -7,15 +7,13 @@ export const routerBindingHandler: KnockoutBindingHandler = {
     bindingContext,
   ) {
     element.addEventListener('click', (e: MouseEvent) => {
-      // 1. Отменяем стандартный переход браузера!
+      // cancel default behavior
       e.preventDefault();
 
-      // 2. Берем адрес из атрибута href
       const path = element.getAttribute('href');
 
       if (path) {
-        // 3. Вызываем метод navigate из нашей корневой модели
-        // $root всегда ссылается на AppRootViewModel
+        // $root always related to the root view model
         bindingContext.$root.navigate(path);
       }
     });
