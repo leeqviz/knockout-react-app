@@ -20,7 +20,21 @@ export class AppViewModel {
     // Initialize observables with default values
     this.globalCount = ko.observable<number>(0);
     this.globalDate = ko.observable<string>(getCurrentISODate());
-    this.globalUsers = ko.observableArray(appStore.getState().users);
+    this.globalUsers = ko.observableArray(appStore.getState().users).extend({
+      storeSyncArray: {
+        store: appStore,
+        selector: (state: AppState) => state.users,
+        setter: (newUser: string) => appStore.getState().addUser(newUser),
+      },
+    });
+
+    // Subscribe to the app store to keep Knockout state in sync with React state
+    /* appStore.subscribe((newState, prevState) => {
+      if (newState.users !== prevState.users) {
+        // Update the Knockout observable array with the new users list from the store if it has changed outside of Knockout
+        this.globalUsers(newState.users);
+      }
+    }); */
 
     // Pure Computed observable is better than computed observable
     this.result = ko.pureComputed(
@@ -29,21 +43,13 @@ export class AppViewModel {
 
     // TODO вынести логику сохранения в localStorage в zustand persist
     this.theme = ko.observable(appStore.getState().theme).extend({
-      localStorage: 'app_theme',
-      globalStore: {
+      localStorageSync: 'app_theme',
+      storeSync: {
         store: appStore,
         selector: (state: AppState) => state.theme, // Как читать из Zustand
-        updater: (newTheme: 'light' | 'dark') =>
+        setter: (newTheme: 'light' | 'dark') =>
           appStore.getState().setTheme(newTheme), // Как писать в Zustand
       },
-    });
-
-    // Subscribe to the app store to keep Knockout state in sync with React state
-    appStore.subscribe((newState, prevState) => {
-      if (newState.users !== prevState.users) {
-        // Update the Knockout observable array with the new users list from the store if it has changed outside of Knockout
-        this.globalUsers(newState.users);
-      }
     });
 
     // Important because we can put these methods in react components as props

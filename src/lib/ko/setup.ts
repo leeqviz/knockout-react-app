@@ -2,10 +2,18 @@ import ko from 'knockout';
 import { reactBindingHandler } from './bindings/react';
 import { datepickerComponent } from './components/datepicker';
 import { mainComponent } from './components/main';
+import { localStorageSync } from './extenders/local-storage-sync';
+import { storeSync } from './extenders/store-sync';
+import { storeSyncArray } from './extenders/store-sync-array';
 import { AppViewModel } from './models/app';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Root element not found');
+
+// apply extenders
+ko.extenders.storeSync = storeSync;
+ko.extenders.storeSyncArray = storeSyncArray;
+ko.extenders.localStorageSync = localStorageSync;
 
 // apply knockout components
 ko.components.register('main-component', mainComponent);
