@@ -1,6 +1,8 @@
 import { DatepickerViewModel } from '@/lib/ko/models/datepicker';
 
-export const datepickerComponent = {
+export const datepickerComponent: KnockoutComponentTypes.Config<
+  typeof DatepickerViewModel
+> = {
   viewModel: DatepickerViewModel,
   template: /*html*/ `
     <div
@@ -11,3 +13,5 @@ export const datepickerComponent = {
       ></div>
     `,
 };
+
+export default datepickerComponent;

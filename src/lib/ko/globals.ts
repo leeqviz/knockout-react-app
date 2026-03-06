@@ -27,4 +27,19 @@ declare global {
       options: StoreSyncArrayConfig<TState, TSlice>,
     ): KnockoutObservableArray<TSlice>;
   }
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace KnockoutComponentTypes {
+    interface Config<T> {
+      viewModel?: T | undefined;
+      lazy?: () => Promise<{
+        default: Config<T>;
+      }>;
+    }
+    interface ComponentConfig<T> {
+      viewModel?: T | undefined;
+      lazy?: () => Promise<{
+        default: ComponentConfig<T>;
+      }>;
+    }
+  }
 }

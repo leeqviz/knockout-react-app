@@ -21,3 +21,13 @@ body {
 .react-component > :first-child {
   display: contents;
 }
+.react-component:empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px; /* Резервируем место, чтобы интерфейс не прыгал */
+  background: url('/path/to/spinner.gif') center center no-repeat;
+  /* Или можно задать серый фон для эффекта skeleton loading */
+  background-color: #f0f0f0;
+  border-radius: 8px;
+}

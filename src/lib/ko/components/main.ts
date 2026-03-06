@@ -1,6 +1,8 @@
 import { MainViewModel } from '@/lib/ko/models/main';
 
-export const mainComponent = {
+export const mainComponent: KnockoutComponentTypes.Config<
+  typeof MainViewModel
+> = {
   viewModel: MainViewModel,
   template: /*html*/ `
     <div
@@ -11,3 +13,5 @@ export const mainComponent = {
       ></div>
     `,
 };
+
+export default mainComponent;
