@@ -5,9 +5,8 @@ export default mergeConfig(
   viteConfig,
   defineConfig({
     test: {
-      globals: true,
-      environment: 'jsdom',
-      setupFiles: './src/tests/setup.ts',
+      environment: 'jsdom', // for react testing library
+      setupFiles: ['./src/tests/setup.ts'], //useful for mocks initialization
     },
   }),
 );
