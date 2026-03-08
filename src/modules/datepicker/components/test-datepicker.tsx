@@ -45,7 +45,10 @@ export function TestDatepicker({ date, setDate }: TestDatepickerProps) {
 
   return (
     <div style={{ marginTop: '10px' }}>
-      <label style={{ display: 'block', fontSize: '12px', color: '#666' }}>
+      <label
+        htmlFor="datepicker"
+        style={{ display: 'block', fontSize: '12px', color: '#666' }}
+      >
         jQuery Datepicker:
       </label>
       <input
