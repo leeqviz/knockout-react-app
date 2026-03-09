@@ -1,6 +1,5 @@
 import '@/lib/jquery/globals';
 import { useAppStore } from '@/lib/react/hooks/state-management';
-// important
 import $ from 'jquery';
 import 'jquery-ui/themes/base/core.css';
 import 'jquery-ui/themes/base/datepicker.css';

@@ -1,4 +1,4 @@
-import { LazyLoadingFallback } from '@/lib/react/components/lazy-loading-fallback';
+import { LazyLoadingFallback } from '@/lib/react/components/lazy-loading';
 import { lazy, Suspense } from 'react';
 import type { DatepickerEntryPointProps } from './entry-point';
 
@@ -10,7 +10,7 @@ const LazyDatepickerEntryPoint = lazy(() =>
 
 export function DatepickerEntryPointLazy(props: DatepickerEntryPointProps) {
   return (
-    <Suspense fallback={LazyLoadingFallback()}>
+    <Suspense fallback={<LazyLoadingFallback />}>
       <LazyDatepickerEntryPoint {...props} />
     </Suspense>
   );

@@ -4,6 +4,8 @@ import type { RouteConfig } from '@/types/routing';
 import type { User } from '@/types/user';
 import ko from 'knockout';
 
+//TODO: split on chunks
+
 // ViewModel as a shell for the entire application
 export class AppViewModel {
   // Observable global variables

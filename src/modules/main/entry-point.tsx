@@ -1,6 +1,6 @@
 import { ErrorBoundary } from '@/lib/react/components/error-boundary';
-import type { RouterContextValue } from '@/lib/react/components/router-context';
-import { RouterProvider } from '@/lib/react/components/router-provider';
+import { RouterProvider } from '@/lib/react/components/routing';
+import type { RouterContextValue } from '@/lib/react/contexts/routing';
 import { MainContainer } from './components/main-container';
 
 export interface MainEntryPointProps {

@@ -1,4 +1,4 @@
-import { LazyLoadingFallback } from '@/lib/react/components/lazy-loading-fallback';
+import { LazyLoadingFallback } from '@/lib/react/components/lazy-loading';
 import { lazy, Suspense } from 'react';
 import type { MainEntryPointProps } from './entry-point';
 

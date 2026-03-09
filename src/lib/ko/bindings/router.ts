@@ -1,3 +1,5 @@
+import ko from 'knockout';
+
 export const routerBindingHandler: KnockoutBindingHandler = {
   init: function (
     element: HTMLElement,
@@ -6,7 +8,7 @@ export const routerBindingHandler: KnockoutBindingHandler = {
     _viewModel,
     bindingContext,
   ) {
-    element.addEventListener('click', (e: MouseEvent) => {
+    function onClick(e: MouseEvent) {
       // cancel default behavior
       e.preventDefault();
 
@@ -16,6 +18,11 @@ export const routerBindingHandler: KnockoutBindingHandler = {
         // $root always related to the root view model
         bindingContext.$root.navigate(path);
       }
+    }
+
+    element.addEventListener('click', onClick);
+    ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+      element.removeEventListener('click', onClick);
     });
   },
 };

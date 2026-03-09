@@ -1,6 +1,6 @@
 import { appEventBus } from '@/lib/ko/event-bus';
-import { DefaultContainer } from '@/lib/react/components/default-container';
-import { useRouter } from '@/lib/react/hooks/routing/use-router';
+import { DefaultContainer } from '@/lib/react/components/containers';
+import { useRouter } from '@/lib/react/hooks/routing';
 import { useEffect } from 'react';
 import { LinkedInput } from './linked-input';
 import { UsersList } from './users-list';

@@ -1,5 +1,5 @@
 import { appEventBus } from '@/lib/ko/event-bus';
-import { DefaultContainer } from '@/lib/react/components/default-container';
+import { DefaultContainer } from '@/lib/react/components/containers';
 import { useEffect } from 'react';
 import { JqueryDatepicker } from './jquery-datepicker';
 

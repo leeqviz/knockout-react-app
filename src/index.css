@@ -31,9 +31,20 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 200px; /* Резервируем место, чтобы интерфейс не прыгал */
-  background: url('/path/to/spinner.gif') center center no-repeat;
-  /* Или можно задать серый фон для эффекта skeleton loading */
-  background-color: #f0f0f0;
+  min-height: 20px;
+  background: #b4b4b4 center center no-repeat;
   border-radius: 8px;
+  animation: react-component__skeleton 2s infinite linear;
+}
+
+@keyframes react-component__skeleton {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
 }

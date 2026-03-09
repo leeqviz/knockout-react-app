@@ -1,4 +1,4 @@
-import { MainEntryPoint } from '@/modules/main/entry-point';
+import { MainEntryPoint } from '@/modules/main';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
