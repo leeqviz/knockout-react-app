@@ -4,7 +4,6 @@ import { appRouter } from '../router';
 export const linkBindingHandler: KnockoutBindingHandler = {
   init: function (element: HTMLElement) {
     function onClick(e: MouseEvent) {
-      // cancel default behavior
       e.preventDefault();
 
       const path = element.getAttribute('href');
@@ -18,5 +17,13 @@ export const linkBindingHandler: KnockoutBindingHandler = {
     ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
       element.removeEventListener('click', onClick);
     });
+  },
+  update: function (element: HTMLElement) {
+    const targetPath = element.getAttribute('href');
+
+    const currentPath = appRouter.currentPathname();
+
+    if (targetPath === currentPath) element.classList.add('active');
+    else element.classList.remove('active');
   },
 };

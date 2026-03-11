@@ -13,8 +13,8 @@ export class ApplicationRouter {
   private routes: RouteConfig[];
   public currentComponent: KnockoutObservable<string>;
   public currentParams: KnockoutObservable<Record<string, string>>;
-  public currentPathname: KnockoutComputed<string>;
-  public currentSearch: KnockoutComputed<string>;
+  public currentPathname: KnockoutObservable<string>;
+  public currentSearch: KnockoutObservable<string>;
 
   private constructor() {
     this.start = this.start.bind(this);
@@ -34,8 +34,8 @@ export class ApplicationRouter {
     ];
     this.currentComponent = ko.observable<string>('main-component');
     this.currentParams = ko.observable<Record<string, string>>({});
-    this.currentPathname = ko.pureComputed(() => '');
-    this.currentSearch = ko.pureComputed(() => '');
+    this.currentPathname = ko.observable(window.location.pathname);
+    this.currentSearch = ko.observable('');
   }
 
   public static getInstance() {
@@ -68,17 +68,17 @@ export class ApplicationRouter {
 
   private handlePath(fullPath: string) {
     const [path, queryString] = fullPath.split('?');
-    if (path) {
-      this.currentPathname = ko.pureComputed(() => path);
-    }
     if (queryString) {
-      this.currentSearch = ko.pureComputed(() => '?' + queryString);
+      this.currentSearch('?' + queryString);
     }
+
     const normalizedPath = path
       ? path.endsWith('/') && path.length > 1
         ? path.slice(0, -1)
         : path
       : '';
+    this.currentPathname(normalizedPath);
+
     const queryParams = queryString
       ? Object.fromEntries(new URLSearchParams(queryString))
       : {};
