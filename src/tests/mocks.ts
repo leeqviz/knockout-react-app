@@ -1,11 +1,12 @@
 import type { RouterContextValue } from '@/lib/react/contexts/routing';
+
 import { vi } from 'vitest';
 
-export const mockRouterContextValue: RouterContextValue = {
+export const mockedRouterContextValue: RouterContextValue = {
   navigate: vi.fn(),
   params: {},
   location: {
-    pathname: '',
+    pathname: '/',
     search: '',
   },
   setSearchParams: vi.fn(),

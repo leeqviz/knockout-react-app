@@ -2,34 +2,42 @@ import type { User } from '@/types/user';
 import { getCurrentISODate } from '@/utils/mappers/date';
 import { createStore } from 'zustand/vanilla';
 
-export interface AppState {
+export interface AppStateData {
   isAuth: boolean;
-  // Count
   count: number;
-  setCount: (value: number) => void;
-  // Date
   date: string;
-  setDate: (value: string) => void;
-  // Users
   users: User[];
-  addUser: (name: string) => void;
-  // Theme
   theme: 'light' | 'dark';
+}
+
+export interface AppStateActions {
+  reset: () => void;
+
+  setCount: (value: number) => void;
+  setDate: (value: string) => void;
+  addUser: (name: string) => void;
   setTheme: (value: 'light' | 'dark') => void;
 }
 
-// Vanilla JS Zustand store
-export const appStore = createStore<AppState>((set) => ({
+export type AppState = AppStateData & AppStateActions;
+
+export const initialAppStateData: AppStateData = {
   isAuth: false,
   count: 0,
-  setCount: (value) => set({ count: value }),
   date: getCurrentISODate(),
-  setDate: (value) => set({ date: value }),
   users: [{ id: 1, name: 'Test' }],
+  theme: 'light',
+};
+
+export const appStore = createStore<AppState>((set) => ({
+  ...initialAppStateData,
+  reset: () => set(initialAppStateData),
+
+  setCount: (value) => set({ count: value }),
+  setDate: (value) => set({ date: value }),
   addUser: (name) =>
     set((state) => ({
       users: [...state.users, { id: Date.now(), name }],
     })),
-  theme: 'light',
   setTheme: (value) => set({ theme: value }),
 }));
