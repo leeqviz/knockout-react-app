@@ -6,12 +6,6 @@ export interface StoreSyncConfig<TState, TSlice> {
   setter?: (newValue: TSlice) => Partial<TState> | void;
 }
 
-export interface StoreSyncArrayConfig<TState, TSlice> {
-  store: StoreApi<TState>;
-  selector: (state: TState) => TSlice[];
-  setter?: ((newValue: TSlice[]) => Partial<TState> | void) | undefined;
-}
-
 export type KnockoutObservableWithDispose<T> = KnockoutObservable<T> & {
   dispose?: () => void;
 };
