@@ -62,6 +62,7 @@ export class AppViewModel {
       this,
     );
     this.appRouter = appRouter;
+    this.appRouter.start();
 
     // Pure Computed observable is better than computed observable
     this.result = ko.pureComputed(() => this.count() + ' ' + this.date());

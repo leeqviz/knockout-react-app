@@ -71,6 +71,7 @@ export class ApplicationRouter {
   }
 
   public start() {
+    console.log('startup');
     window.addEventListener('popstate', this.handlePopState);
     this.handlePath(window.location.pathname + window.location.search);
   }
@@ -122,7 +123,6 @@ export class ApplicationRouter {
       const match = normalizedPath.match(regex);
 
       if (match) {
-        //TODO check when page loads also
         for (const middleware of route.middlewares || []) {
           const result = middleware({ navigate: this.navigate, fullPath });
           console.warn(`Middleware: `, result);
