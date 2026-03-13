@@ -1,5 +1,6 @@
-import { ko } from '@/lib/ko/globals';
-import { requireAuth } from './middlewares';
+import type { RouterData } from '@/types/router';
+import { ko } from '../globals';
+import { requireAuth } from '../middlewares';
 
 export interface RouteMiddlewareContext {
   navigate: (path: string, options?: { replace?: boolean | undefined }) => void;
@@ -39,6 +40,7 @@ export class ApplicationRouter {
     this.navigate = this.navigate.bind(this);
     this.handlePath = this.handlePath.bind(this);
     this.setSearchParams = this.setSearchParams.bind(this);
+    this.mapRouterData = this.mapRouterData.bind(this);
 
     this.routes = options?.routes || [
       // order is important
@@ -166,6 +168,21 @@ export class ApplicationRouter {
     });
 
     this.navigate(url.pathname + url.search, { replace: true });
+  }
+
+  public mapRouterData(): RouterData {
+    return {
+      navigate: (path: string, options?: { replace?: boolean | undefined }) =>
+        this.navigate(path, options),
+      params: this.currentParams(),
+      location: {
+        pathname: this.currentPathname(),
+        search: this.currentSearch(),
+      },
+      setSearchParams: (newParams: Record<string, string>) => {
+        this.setSearchParams(newParams);
+      },
+    };
   }
 }
 

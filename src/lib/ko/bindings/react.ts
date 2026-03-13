@@ -1,6 +1,6 @@
-import { ko } from '@/lib/ko/globals';
 import { createElement, type ElementType } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { ko } from '../globals';
 
 // Extends HTMLElement to add _reactRoot property
 export interface ReactRootHTMLElement extends HTMLElement {

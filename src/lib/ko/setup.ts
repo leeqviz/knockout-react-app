@@ -1,4 +1,3 @@
-import { ko } from '@/lib/ko/globals';
 import { linkBindingHandler } from './bindings/link';
 import { navigateBindingHandler } from './bindings/navigate';
 import { reactBindingHandler } from './bindings/react';
@@ -7,6 +6,7 @@ import { mainComponent } from './components/main';
 import { notFoundComponent } from './components/not-found';
 import { localStorageSync } from './extenders/local-storage-sync';
 import { storeSync } from './extenders/store-sync';
+import { ko } from './globals';
 import { lazyComponentLoader } from './loaders/lazy-component';
 import { AppViewModel } from './models/app';
 

@@ -1,7 +1,7 @@
-import { ko } from '@/lib/ko/globals';
 import { MainEntryPointLazy, type MainEntryPointProps } from '@/modules/main';
 import type { ComponentType } from 'react';
-import { mapRouterData } from '../mapper';
+import { ko } from '../globals';
+import { appRouter } from '../router';
 
 export class MainViewModel {
   public computedProps: KnockoutComputed<MainEntryPointProps>;
@@ -10,7 +10,7 @@ export class MainViewModel {
   constructor(params: { withRouter?: boolean | undefined }) {
     // pureComputed guarantees that the function will only be called when the observable changes
     this.computedProps = ko.pureComputed(() => ({
-      router: params.withRouter ? mapRouterData() : null,
+      router: params.withRouter ? appRouter.mapRouterData() : null,
     }));
     this.component = MainEntryPointLazy;
   }

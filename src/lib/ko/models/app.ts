@@ -1,10 +1,10 @@
-import { appEventBus, type ApplicationEventMap } from '@/lib/ko/event-bus';
-import { ko } from '@/lib/ko/globals';
 import { appStore, type AppState } from '@/stores/app';
 import type { User } from '@/types/user';
-import type {
-  KnockoutObservableArrayWithDispose,
-  KnockoutObservableWithDispose,
+import { appEventBus, type ApplicationEventMap } from '../event-bus';
+import {
+  ko,
+  type KnockoutObservableArrayWithDispose,
+  type KnockoutObservableWithDispose,
 } from '../globals';
 import { appRouter, type ApplicationRouter } from '../router';
 

@@ -1,4 +1,4 @@
-import { ko } from '@/lib/ko/globals';
+import { ko } from '../globals';
 
 export interface ApplicationEventMap {
   REACT_COMPONENT_READY: { componentId: string };

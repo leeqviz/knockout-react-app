@@ -1,10 +1,10 @@
 import { RouterProvider } from '@/lib/react/components/routing';
-import type { RouterContextValue } from '@/lib/react/contexts/routing';
+import type { RouterData } from '@/types/router';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { vi } from 'vitest';
 
-export const mockedRouterContextValue: RouterContextValue = {
+export const mockedRouterContextValue: RouterData = {
   navigate: vi.fn(),
   params: {},
   location: {
@@ -16,7 +16,7 @@ export const mockedRouterContextValue: RouterContextValue = {
 
 export function renderWithRouterContext(
   ui: ReactElement,
-  partialRouterContextValue: Partial<RouterContextValue> = {},
+  partialRouterContextValue: Partial<RouterData> = {},
 ) {
   const routerContextValue = {
     ...mockedRouterContextValue,

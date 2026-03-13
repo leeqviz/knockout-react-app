@@ -1,4 +1,4 @@
-import { ko } from '@/lib/ko/globals';
+import { ko } from '../globals';
 import { appRouter } from '../router';
 
 export const linkBindingHandler: KnockoutBindingHandler = {

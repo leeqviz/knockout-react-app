@@ -1,15 +1,9 @@
-import { DatepickerViewModel } from '@/lib/ko/models/datepicker';
+import { DatepickerViewModel } from '../models/datepicker';
+import { datepickerTemplate } from '../templates/datepicker';
 
 export const datepickerComponent: KnockoutComponentTypes.Config<
   typeof DatepickerViewModel
 > = {
   viewModel: DatepickerViewModel,
-  template: /*html*/ `
-    <div
-        data-bind="reactDatepicker: { 
-            component, 
-            props: computedProps()
-        }"
-      ></div>
-    `,
+  template: datepickerTemplate,
 };

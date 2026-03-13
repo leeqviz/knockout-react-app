@@ -1,15 +1,9 @@
-import { MainViewModel } from '@/lib/ko/models/main';
+import { MainViewModel } from '../models/main';
+import { mainTemplate } from '../templates/main';
 
 export const mainComponent: KnockoutComponentTypes.Config<
   typeof MainViewModel
 > = {
   viewModel: MainViewModel,
-  template: /*html*/ `
-    <div
-        data-bind="reactMain: { 
-            component, 
-            props: computedProps()
-        }"
-      ></div>
-    `,
+  template: mainTemplate,
 };

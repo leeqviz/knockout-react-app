@@ -1,10 +1,10 @@
-import { ko } from '@/lib/ko/globals';
 import {
   DatepickerEntryPointLazy,
   type DatepickerEntryPointProps,
 } from '@/modules/datepicker';
 import type { ComponentType } from 'react';
-import { mapRouterData } from '../mapper';
+import { ko } from '../globals';
+import { appRouter } from '../router';
 
 export class DatepickerViewModel {
   public computedProps: KnockoutComputed<DatepickerEntryPointProps>;
@@ -13,7 +13,7 @@ export class DatepickerViewModel {
   constructor(params: { withRouter?: boolean | undefined }) {
     // pureComputed guarantees that the function will only be called when the observable changes
     this.computedProps = ko.pureComputed(() => ({
-      router: params.withRouter ? mapRouterData() : null,
+      router: params.withRouter ? appRouter.mapRouterData() : null,
     }));
     this.component = DatepickerEntryPointLazy;
   }
