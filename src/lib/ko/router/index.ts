@@ -8,7 +8,7 @@ export interface RouteMiddlewareContext {
 
 export type RouteMiddleware = (
   context: RouteMiddlewareContext,
-) => boolean | string;
+) => boolean | string | void;
 
 export interface RouteConfig {
   pattern: string;
@@ -109,16 +109,13 @@ export class BaseRouter {
 
   public mapRouterData(): RouterData {
     return {
-      navigate: (path: string, options?: { replace?: boolean | undefined }) =>
-        this.navigate(path, options),
+      navigate: this.navigate,
       params: this.currentParams(),
       location: {
         pathname: this.currentPathname(),
         search: this.currentSearch(),
       },
-      setSearchParams: (newParams: Record<string, string>) => {
-        this.setSearchParams(newParams);
-      },
+      setSearchParams: this.setSearchParams,
     };
   }
 
@@ -127,17 +124,20 @@ export class BaseRouter {
   };
 
   protected handlePath(fullPath: string): void {
-    const [rawPath, queryString] = fullPath.split('?');
-    const pathname = rawPath ? this.normalizePath(rawPath) : '';
-    const queryParams = queryString
-      ? Object.fromEntries(new URLSearchParams(queryString))
+    const [rawPath, rawQueryString] = fullPath.split('?');
+
+    const normalizedPath = rawPath ? this.normalizePath(rawPath) : '';
+    const normalizedQueryString = rawQueryString ? `?${rawQueryString}` : '';
+
+    this.currentPathname(normalizedPath);
+    this.currentSearch(normalizedQueryString);
+
+    const queryParams = rawQueryString
+      ? Object.fromEntries(new URLSearchParams(rawQueryString))
       : {};
 
-    this.currentPathname(pathname);
-    this.currentSearch(queryString ? `?${queryString}` : '');
-
     for (const route of this.routes) {
-      const match = this.matchRoute(route.pattern, pathname);
+      const match = this.matchRoute(route.pattern, normalizedPath);
 
       if (!match) {
         continue;
@@ -155,7 +155,7 @@ export class BaseRouter {
       }
 
       this.currentComponent(route.component);
-      this.currentParams({ ...queryParams, ...match.params });
+      this.currentParams({ ...queryParams, ...match });
       return;
     }
 
@@ -165,7 +165,7 @@ export class BaseRouter {
 
   protected normalizePath(path: string): string {
     if (!path) {
-      return '';
+      return '/';
     }
 
     return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
@@ -187,13 +187,12 @@ export class BaseRouter {
     }
   }
 
-  protected matchRoute(
-    pattern: string,
-    pathname: string,
-  ): { params: RouteParams } | null {
+  protected matchRoute(pattern: string, pathname: string): RouteParams | null {
     const paramNames: string[] = [];
 
-    const regexPattern = pattern
+    const escapedPattern = pattern.replace(/[.+*?^${}()|[\]\\]/g, '\\$&');
+
+    const regexPattern = escapedPattern
       .replace(/:([^\\/]+)/g, (_, paramName: string) => {
         paramNames.push(paramName);
         return '([a-zA-Z0-9_-]+)';
@@ -209,11 +208,9 @@ export class BaseRouter {
 
     const paramValues = match.slice(1);
 
-    const params = paramNames.reduce<RouteParams>((acc, name, index) => {
+    return paramNames.reduce<RouteParams>((acc, name, index) => {
       acc[name] = paramValues[index] || '';
       return acc;
     }, {});
-
-    return { params };
   }
 }
