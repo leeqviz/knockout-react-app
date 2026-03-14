@@ -7,7 +7,7 @@ export class MainViewModel {
   public computedProps: KnockoutComputed<MainEntryPointProps>;
   public component: ComponentType<MainEntryPointProps>;
 
-  constructor(params: { withRouter?: boolean | undefined }) {
+  public constructor(params: { withRouter?: boolean | undefined }) {
     // pureComputed guarantees that the function will only be called when the observable changes
     this.computedProps = ko.pureComputed(() => ({
       router: params.withRouter ? appRouter.mapRouterData() : null,

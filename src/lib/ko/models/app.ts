@@ -4,7 +4,7 @@ import {
   appEventBus,
   ApplicationEvent,
   type ApplicationEventPayloadMap,
-} from '../event-bus';
+} from '../event-bus/app';
 import {
   ko,
   type KnockoutObservableArrayWithDispose,
@@ -26,7 +26,7 @@ export class AppViewModel {
   // client side routing
   public appRouter: ApplicationRouter;
 
-  constructor() {
+  public constructor() {
     // Initialize observables with default values
     this.count = ko.observable<number>(appStore.getState().count).extend({
       storeSync: {

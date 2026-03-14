@@ -10,13 +10,13 @@ export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
   { hasError: boolean }
 > {
-  override state = { hasError: false };
+  public override state = { hasError: false };
 
-  static getDerivedStateFromError() {
+  public static getDerivedStateFromError() {
     return { hasError: true };
   }
 
-  override componentDidCatch(error: Error, info: ErrorInfo) {
+  public override componentDidCatch(error: Error, info: ErrorInfo) {
     // Logging
     console.error(
       `[React Bridge] Error in component ${this.props.name || 'Unknown'}:`,
@@ -25,7 +25,7 @@ export class ErrorBoundary extends Component<
     );
   }
 
-  override render() {
+  public override render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;

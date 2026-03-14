@@ -1,4 +1,8 @@
-import { appEventBus, ApplicationEvent } from '@/lib/ko/event-bus';
+import {
+  appEventBus,
+  ApplicationEvent,
+  type ApplicationEventPayloadMap,
+} from '@/lib/ko/event-bus/app';
 import { DefaultContainer } from '@/lib/react/components/containers';
 import { useRouter } from '@/lib/react/hooks/routing';
 import { useEffect } from 'react';
@@ -10,9 +14,10 @@ export function MainContainer() {
   console.log('MainContainer router: ', router);
 
   useEffect(() => {
-    appEventBus.publish(ApplicationEvent.REACT_COMPONENT_RENDER, {
+    const payload: ApplicationEventPayloadMap['react/component-render'] = {
       name: 'main',
-    });
+    };
+    appEventBus.publish(ApplicationEvent.REACT_COMPONENT_RENDER, payload);
   }, []);
 
   return (

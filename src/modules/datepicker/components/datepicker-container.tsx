@@ -1,13 +1,18 @@
-import { appEventBus, ApplicationEvent } from '@/lib/ko/event-bus';
+import {
+  appEventBus,
+  ApplicationEvent,
+  type ApplicationEventPayloadMap,
+} from '@/lib/ko/event-bus/app';
 import { DefaultContainer } from '@/lib/react/components/containers';
 import { useEffect } from 'react';
 import { JqueryDatepicker } from './jquery-datepicker';
 
 export function DatepickerContainer() {
   useEffect(() => {
-    appEventBus.publish(ApplicationEvent.REACT_COMPONENT_RENDER, {
+    const payload: ApplicationEventPayloadMap['react/component-render'] = {
       name: 'datepicker',
-    });
+    };
+    appEventBus.publish(ApplicationEvent.REACT_COMPONENT_RENDER, payload);
   }, []);
 
   return (

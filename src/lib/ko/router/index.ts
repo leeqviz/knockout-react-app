@@ -2,6 +2,8 @@ import type { RouterData } from '@/types/router';
 import { ko } from '../globals';
 import { requireAuth } from '../middlewares';
 
+// TODO: сделать абстрактнее и гибче как с event bus
+
 export interface RouteMiddlewareContext {
   navigate: (path: string, options?: { replace?: boolean | undefined }) => void;
   fullPath: string;

@@ -1,5 +1,5 @@
 export class NotFoundViewModel {
-  constructor() {}
+  public constructor() {}
 
   public dispose() {}
 }

@@ -1,56 +1,27 @@
 import { ko } from '../globals';
 
-export const ApplicationEvent = {
-  REACT_COMPONENT_RENDER: 'react/component-render',
-  TEST: 'test',
-} as const;
+export class EventBus<TEventPayloadMap extends Record<string, unknown>> {
+  protected dispatcher: KnockoutSubscribable<unknown>;
 
-export interface ApplicationEventPayloadMap {
-  [ApplicationEvent.REACT_COMPONENT_RENDER]: { name: string };
-  [ApplicationEvent.TEST]: string;
-}
+  public constructor() {
+    this.dispatcher = new ko.subscribable<unknown>();
 
-// get ApplicationEvent values as type union because ApplicationEvent has not only one key
-export type ApplicationEventName =
-  (typeof ApplicationEvent)[keyof typeof ApplicationEvent];
-
-// additional helper for type-safety
-// example: ApplicationEventPayloadOf<typeof ApplicationEvent.REACT_COMPONENT_RENDER>
-export type ApplicationEventPayloadOf<T extends ApplicationEventName> =
-  ApplicationEventPayloadMap[T];
-
-export class ApplicationEventBus {
-  private static instance: ApplicationEventBus | null;
-  private dispatcher: KnockoutSubscribable<unknown>;
-
-  private constructor() {
     this.publish = this.publish.bind(this);
     this.subscribe = this.subscribe.bind(this);
-
-    this.dispatcher = new ko.subscribable<unknown>();
   }
 
-  public static getInstance() {
-    if (!ApplicationEventBus.instance) {
-      ApplicationEventBus.instance = new ApplicationEventBus();
-    }
-    return ApplicationEventBus.instance;
-  }
-
-  public publish<T extends ApplicationEventName>(
-    event: T,
-    payload: ApplicationEventPayloadMap[T],
+  public publish<TEvent extends keyof TEventPayloadMap & string>(
+    event: TEvent,
+    payload: TEventPayloadMap[TEvent],
   ): void {
     this.dispatcher.notifySubscribers(payload, event);
   }
 
-  public subscribe<T extends ApplicationEventName>(
-    event: T,
-    callback: (payload: ApplicationEventPayloadMap[T]) => void,
+  public subscribe<TEvent extends keyof TEventPayloadMap & string>(
+    event: TEvent,
+    callback: (payload: TEventPayloadMap[TEvent]) => void,
     target?: unknown,
   ): KnockoutSubscription {
     return this.dispatcher.subscribe(callback, target, event);
   }
 }
-
-export const appEventBus = ApplicationEventBus.getInstance();
