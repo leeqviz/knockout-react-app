@@ -1,10 +1,10 @@
 import { ErrorBoundary } from '@/lib/react/components/error-boundary';
 import { RouterProvider } from '@/lib/react/components/routing';
-import type { RouterData } from '@/types/router';
+import type { RouterSnapshot } from '@/types/router';
 import { MainContainer } from './components/main-container';
 
 export interface MainEntryPointProps {
-  router: RouterData | null;
+  router: RouterSnapshot | null;
 }
 
 export function MainEntryPoint({ router }: MainEntryPointProps) {

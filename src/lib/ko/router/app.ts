@@ -1,16 +1,16 @@
-import { BaseRouter, type RouteConfig } from '.';
+import { BaseRouter, type RouteConfig, type RouterOptions } from '.';
 import { requireAuth } from '../middlewares';
 
 export class ApplicationRouter extends BaseRouter {
   private static instance: ApplicationRouter | null = null;
 
-  private constructor() {
-    super();
+  private constructor(options?: RouterOptions) {
+    super(options);
   }
 
-  public static getInstance(): ApplicationRouter {
+  public static getInstance(options?: RouterOptions): ApplicationRouter {
     if (!ApplicationRouter.instance) {
-      ApplicationRouter.instance = new ApplicationRouter();
+      ApplicationRouter.instance = new ApplicationRouter(options);
     }
 
     return ApplicationRouter.instance;

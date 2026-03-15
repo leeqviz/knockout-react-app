@@ -1,10 +1,10 @@
 import { RouterProvider } from '@/lib/react/components/routing';
-import type { RouterData } from '@/types/router';
+import type { RouterSnapshot } from '@/types/router';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { vi } from 'vitest';
 
-export const mockedRouterContextValue: RouterData = {
+export const mockedRouterContextValue: RouterSnapshot = {
   navigate: vi.fn(),
   params: {},
   location: {
@@ -16,7 +16,7 @@ export const mockedRouterContextValue: RouterData = {
 
 export function renderWithRouterContext(
   ui: ReactElement,
-  partialRouterContextValue: Partial<RouterData> = {},
+  partialRouterContextValue: Partial<RouterSnapshot> = {},
 ) {
   const routerContextValue = {
     ...mockedRouterContextValue,

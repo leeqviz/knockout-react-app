@@ -1,4 +1,4 @@
-export interface RouterData {
+export interface RouterSnapshot {
   navigate: (path: string, options?: { replace?: boolean | undefined }) => void;
   params: Record<string, string>;
   location: {
