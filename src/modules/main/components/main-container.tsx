@@ -2,7 +2,7 @@ import {
   appEventBus,
   ApplicationEvent,
   type ApplicationEventPayloadMap,
-} from '@/shared/event-bus/app';
+} from '@/shared/event-bus';
 import { useRouter } from '@/shared/router';
 import { DefaultContainer } from '@/shared/ui/container';
 import { Link } from '@/shared/ui/link';

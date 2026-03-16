@@ -1,5 +1,4 @@
-import { RouterProvider } from '@/shared/router';
-import type { RouterSnapshot } from '@/shared/router/types/router';
+import { RouterProvider, type RouterSnapshot } from '@/shared/router';
 import { ErrorBoundary } from '@/shared/ui/error-boundary';
 import { MainContainer } from './components/main-container';
 
