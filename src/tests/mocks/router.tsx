@@ -1,5 +1,4 @@
-import { RouterProvider } from '@/lib/react/components/routing';
-import type { RouterSnapshot } from '@/types/router';
+import { RouterProvider, type RouterSnapshot } from '@/shared/router';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { vi } from 'vitest';

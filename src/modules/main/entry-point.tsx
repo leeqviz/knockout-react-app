@@ -1,6 +1,6 @@
-import { ErrorBoundary } from '@/lib/react/components/error-boundary';
-import { RouterProvider } from '@/lib/react/components/routing';
-import type { RouterSnapshot } from '@/types/router';
+import { RouterProvider } from '@/shared/router';
+import type { RouterSnapshot } from '@/shared/router/types/router';
+import { ErrorBoundary } from '@/shared/ui/error-boundary';
 import { MainContainer } from './components/main-container';
 
 export interface MainEntryPointProps {

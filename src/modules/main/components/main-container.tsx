@@ -2,10 +2,10 @@ import {
   appEventBus,
   ApplicationEvent,
   type ApplicationEventPayloadMap,
-} from '@/lib/ko/event-bus/app';
-import { DefaultContainer } from '@/lib/react/components/containers';
-import { Link } from '@/lib/react/components/routing';
-import { useRouter } from '@/lib/react/hooks/routing';
+} from '@/shared/event-bus';
+import { useRouter } from '@/shared/router';
+import { DefaultContainer } from '@/shared/ui/container';
+import { Link } from '@/shared/ui/link';
 import { useEffect } from 'react';
 import { LinkedInput } from './linked-input';
 import { UsersList } from './users-list';

@@ -2,8 +2,8 @@ import {
   appEventBus,
   ApplicationEvent,
   type ApplicationEventPayloadMap,
-} from '@/lib/ko/event-bus/app';
-import { DefaultContainer } from '@/lib/react/components/containers';
+} from '@/shared/event-bus';
+import { DefaultContainer } from '@/shared/ui/container';
 import { useEffect } from 'react';
 import { JqueryDatepicker } from './jquery-datepicker';
 
