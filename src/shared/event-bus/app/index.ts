@@ -1,4 +1,4 @@
-import { BaseEventBus } from './lib';
+import { BaseEventBus } from '@/shared/event-bus/lib';
 import type { ApplicationEventPayloadMap } from './types';
 
 export class ApplicationEventBus extends BaseEventBus<ApplicationEventPayloadMap> {
@@ -18,3 +18,7 @@ export class ApplicationEventBus extends BaseEventBus<ApplicationEventPayloadMap
 }
 
 export const appEventBus = ApplicationEventBus.getInstance();
+
+export * from './constants';
+export * from './hooks';
+export * from './types';

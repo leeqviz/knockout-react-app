@@ -1,4 +1,4 @@
-import { useAppStore } from '@/shared/store/hooks';
+import { useAppStore } from '@/shared/store/app/hooks';
 import { useId } from 'react';
 import styles from './linked-input.module.css';
 

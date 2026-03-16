@@ -1,6 +1,6 @@
+import { ko } from '@/shared/lib/ko';
 import { createElement, type ElementType } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { ko } from '../../../shared/lib/ko';
 
 // Extends HTMLElement to add _reactRoot property
 interface ReactRootHTMLElement extends HTMLElement {

@@ -2,7 +2,7 @@ import type {
   KnockoutObservableArrayWithDispose,
   KnockoutObservableWithDispose,
   StoreSyncConfig,
-} from '../../../shared/lib/ko/types';
+} from '@/shared/lib/ko';
 
 export function storeSync<TState, TSlice>(
   target:

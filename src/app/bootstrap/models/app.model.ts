@@ -2,7 +2,7 @@ import {
   appEventBus,
   ApplicationEvent,
   type ApplicationEventPayloadMap,
-} from '@/shared/event-bus';
+} from '@/shared/event-bus/app';
 import {
   ko,
   type KnockoutObservableArrayWithDispose,
@@ -10,7 +10,7 @@ import {
 } from '@/shared/lib/ko';
 import { appRouter, type ApplicationRouter } from '@/shared/router';
 import { appStore, type AppState } from '@/shared/store/app';
-import type { User } from '@/shared/store/types';
+import type { User } from '@/shared/store/app/types';
 
 // ViewModel as a shell for the entire application
 export class AppViewModel {

@@ -1,7 +1,7 @@
 import type {
   KnockoutObservableArrayWithDispose,
   KnockoutObservableWithDispose,
-} from '../../../shared/lib/ko/types';
+} from '@/shared/lib/ko';
 
 export function localStorageSync<T>(
   target:

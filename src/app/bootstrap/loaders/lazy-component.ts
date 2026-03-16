@@ -1,4 +1,4 @@
-import { ko } from '../../../shared/lib/ko';
+import { ko } from '@/shared/lib/ko';
 
 export const lazyComponentLoader: KnockoutComponentTypes.Loader = {
   loadComponent: function (name, componentConfig, callback) {
