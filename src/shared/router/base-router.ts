@@ -24,7 +24,7 @@ export class BaseRouter {
   public currentSearchParams: KnockoutObservable<RouteParams>;
   public currentHistoryState: KnockoutObservable<unknown>;
 
-  protected constructor(options?: RouterOptions) {
+  protected constructor(options: RouterOptions) {
     this.start = this.start.bind(this);
     this.dispose = this.dispose.bind(this);
     this.handlePopState = this.handlePopState.bind(this);
@@ -71,7 +71,7 @@ export class BaseRouter {
   }
 
   protected getDefaultNotFoundComponent(): string {
-    return 'not-found-component';
+    return '';
   }
 
   public start(): void {

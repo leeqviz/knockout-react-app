@@ -1,13 +1,10 @@
-import {
-  notFoundComponentMeta,
-  notFoundLazyComponentMeta,
-} from '@/shared/router';
 import { registerComponent } from '@/shared/utils/ko';
 import {
   datepickerComponentMeta,
   datepickerLazyComponentMeta,
 } from './datepicker';
 import { mainComponentMeta, mainLazyComponentMeta } from './main';
+import { notFoundComponentMeta, notFoundLazyComponentMeta } from './not-found';
 
 const components = [
   mainComponentMeta,
@@ -22,6 +19,6 @@ export function setupComponents() {
   components.forEach((component) =>
     component.lazy
       ? registerComponent(component.name, { lazy: component.lazy })
-      : registerComponent(component.name, component.component),
+      : registerComponent(component.name, { ...component.component }),
   );
 }

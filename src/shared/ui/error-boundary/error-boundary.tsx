@@ -6,13 +6,17 @@ interface ErrorBoundaryProps {
   fallback?: ReactNode;
 }
 
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
 export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
-  { hasError: boolean }
+  ErrorBoundaryState
 > {
-  public override state = { hasError: false };
+  public override state: ErrorBoundaryState = { hasError: false };
 
-  public static getDerivedStateFromError() {
+  public static getDerivedStateFromError(): ErrorBoundaryState {
     return { hasError: true };
   }
 

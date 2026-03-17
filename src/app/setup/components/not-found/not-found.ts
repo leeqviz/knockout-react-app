@@ -8,7 +8,6 @@ export const notFoundComponentMeta: KnockoutComponentMeta = {
 
 export const notFoundLazyComponentMeta: KnockoutComponentMeta = {
   name: 'not-found-lazy-component',
-  component: notFoundComponent,
   lazy: () =>
     import('./not-found.component').then((res) => ({
       default: res.notFoundComponent,

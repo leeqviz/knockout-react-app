@@ -8,7 +8,6 @@ export const mainComponentMeta: KnockoutComponentMeta = {
 
 export const mainLazyComponentMeta: KnockoutComponentMeta = {
   name: 'main-lazy-component',
-  component: mainComponent,
   lazy: () =>
     import('./main.component').then((res) => ({
       default: res.mainComponent,

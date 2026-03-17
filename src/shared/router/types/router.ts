@@ -17,8 +17,8 @@ export interface RouteConfig {
 }
 
 export interface RouterOptions {
-  routes?: RouteConfig[];
-  notFoundComponent?: string;
+  routes: RouteConfig[];
+  notFoundComponent: string;
   middlewares?: RouteMiddleware[] | undefined;
 }
 

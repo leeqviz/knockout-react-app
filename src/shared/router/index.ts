@@ -1,5 +1,4 @@
 export { appRouter, type AppRouter } from './app-router';
-export { notFoundComponentMeta, notFoundLazyComponentMeta } from './components';
 export { RouterContext } from './context';
 export { useRouter } from './hooks';
 export { requireAdmin, requireAuth } from './middlewares';

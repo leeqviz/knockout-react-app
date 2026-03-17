@@ -8,7 +8,6 @@ export const datepickerComponentMeta: KnockoutComponentMeta = {
 
 export const datepickerLazyComponentMeta: KnockoutComponentMeta = {
   name: 'datepicker-lazy-component',
-  component: datepickerComponent,
   lazy: () =>
     import('./datepicker.component').then((res) => ({
       default: res.datepickerComponent,

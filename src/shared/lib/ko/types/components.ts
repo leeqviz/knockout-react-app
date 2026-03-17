@@ -1,9 +1,9 @@
-export interface KnockoutComponentMeta {
+export interface KnockoutComponentMeta<T = unknown> {
   name: string;
-  component: KnockoutComponentTypes.Config<unknown>;
+  component?: KnockoutComponentTypes.Config<T>;
   lazy?:
     | (() => Promise<{
-        default?: KnockoutComponentTypes.Config<unknown> | undefined;
+        default?: KnockoutComponentTypes.Config<T> | undefined;
       }>)
     | undefined;
 }
