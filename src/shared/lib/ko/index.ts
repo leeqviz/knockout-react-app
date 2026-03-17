@@ -9,6 +9,7 @@ declare global {
     ko: KnockoutStatic; //typeof import('knockout');
   }
   interface KnockoutExtenders {
+    [name: string]: unknown;
     localStorageSync<T>(
       target:
         | KnockoutObservableWithDispose<T>
@@ -47,6 +48,7 @@ declare global {
 
 export const ko = window.ko;
 export type {
+  KnockoutComponentMeta,
   KnockoutObservableArrayWithDispose,
   KnockoutObservableWithDispose,
   StoreSyncConfig,

@@ -3,9 +3,15 @@ import { linkBindingHandler } from './link.binding';
 import { navigateBindingHandler } from './navigate.binding';
 import { reactBindingHandler } from './react.binding';
 
+const bindingHandlers: Record<string, KnockoutBindingHandler> = {
+  link: linkBindingHandler,
+  navigate: navigateBindingHandler,
+  reactMain: reactBindingHandler,
+  reactDatepicker: reactBindingHandler,
+};
+
 export function setupBindings() {
-  ko.bindingHandlers['link'] = linkBindingHandler;
-  ko.bindingHandlers['navigate'] = navigateBindingHandler;
-  ko.bindingHandlers['reactMain'] = reactBindingHandler;
-  ko.bindingHandlers['reactDatepicker'] = reactBindingHandler;
+  Object.entries(bindingHandlers).forEach(([name, handler]) => {
+    ko.bindingHandlers[name] = handler;
+  });
 }

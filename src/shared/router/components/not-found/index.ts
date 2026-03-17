@@ -1,1 +1,1 @@
-export { notFoundComponent } from './not-found.component';
+export { notFoundComponentMeta, notFoundLazyComponentMeta } from './not-found';

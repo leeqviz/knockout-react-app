@@ -1,23 +1,27 @@
-import { ko } from '@/shared/lib/ko';
-import { notFoundComponent } from '@/shared/router';
-import { datepickerComponent } from './datepicker';
-import { mainComponent } from './main';
+import {
+  notFoundComponentMeta,
+  notFoundLazyComponentMeta,
+} from '@/shared/router';
+import { registerComponent } from '@/shared/utils/ko';
+import {
+  datepickerComponentMeta,
+  datepickerLazyComponentMeta,
+} from './datepicker';
+import { mainComponentMeta, mainLazyComponentMeta } from './main';
+
+const components = [
+  mainComponentMeta,
+  mainLazyComponentMeta,
+  datepickerComponentMeta,
+  datepickerLazyComponentMeta,
+  notFoundComponentMeta,
+  notFoundLazyComponentMeta,
+];
 
 export function setupComponents() {
-  ko.components.register('not-found-component', notFoundComponent);
-  ko.components.register('main-component', mainComponent);
-  ko.components.register('datepicker-component', datepickerComponent);
-
-  ko.components.register('main-lazy-component', {
-    lazy: () =>
-      import('@/app/setup/components/main').then((res) => ({
-        default: res.mainComponent,
-      })),
-  });
-  ko.components.register('datepicker-lazy-component', {
-    lazy: () =>
-      import('@/app/setup/components/datepicker').then((res) => ({
-        default: res.datepickerComponent,
-      })),
-  });
+  components.forEach((component) =>
+    component.lazy
+      ? registerComponent(component.name, { lazy: component.lazy })
+      : registerComponent(component.name, component.component),
+  );
 }

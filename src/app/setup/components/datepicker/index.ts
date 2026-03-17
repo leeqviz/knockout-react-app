@@ -1,1 +1,4 @@
-export { datepickerComponent } from './datepicker.component';
+export {
+  datepickerComponentMeta,
+  datepickerLazyComponentMeta,
+} from './datepicker';
