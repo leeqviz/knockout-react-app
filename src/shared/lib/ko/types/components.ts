@@ -7,3 +7,7 @@ export interface KnockoutComponentMeta<T = unknown> {
       }>)
     | undefined;
 }
+
+export interface ReactComponentViewModelParams {
+  withRouter?: boolean | undefined;
+}

@@ -51,5 +51,6 @@ export type {
   KnockoutComponentMeta,
   KnockoutObservableArrayWithDispose,
   KnockoutObservableWithDispose,
+  ReactComponentViewModelParams,
   StoreSyncConfig,
 } from './types';
