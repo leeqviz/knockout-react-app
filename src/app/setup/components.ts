@@ -1,16 +1,12 @@
 import {
   datepickerComponentMeta,
   datepickerLazyComponentMeta,
-} from '@/app/components/datepicker';
-import {
   mainComponentMeta,
   mainLazyComponentMeta,
-} from '@/app/components/main';
-import {
   notFoundComponentMeta,
   notFoundLazyComponentMeta,
-} from '@/app/components/not-found';
-import { registerComponent } from '@/shared/utils/ko';
+} from '@/app/components';
+import { ko } from '@/shared/lib/ko';
 
 const components = [
   mainComponentMeta,
@@ -22,9 +18,16 @@ const components = [
 ];
 
 export function setupComponents() {
-  components.forEach((component) =>
-    component.lazy
-      ? registerComponent(component.name, { lazy: component.lazy })
-      : registerComponent(component.name, { ...component.component }),
-  );
+  components.forEach((component) => {
+    if (ko.components.isRegistered(component.name)) {
+      console.warn(
+        `Component "${component.name}" is already registered. Unregistering...`,
+      );
+      ko.components.unregister(component.name);
+    }
+    ko.components.register(
+      component.name,
+      component.lazy ? { lazy: component.lazy } : { ...component.component },
+    );
+  });
 }

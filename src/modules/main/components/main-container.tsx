@@ -3,9 +3,8 @@ import {
   appEventBus,
   type AppEventPayloadMap,
 } from '@/shared/event-bus';
-import { useRouter } from '@/shared/router';
+import { Link, useRouter } from '@/shared/router';
 import { DefaultContainer } from '@/shared/ui/container';
-import { Link } from '@/shared/ui/link';
 import { useEffect } from 'react';
 import { LinkedInput } from './linked-input';
 import { UsersList } from './users-list';

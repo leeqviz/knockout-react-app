@@ -1,1 +1,1 @@
-export { mainComponentMeta, mainLazyComponentMeta } from './main';
+export { mainComponentMeta, mainLazyComponentMeta } from './main.meta';

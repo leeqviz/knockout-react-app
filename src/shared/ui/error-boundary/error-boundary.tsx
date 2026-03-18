@@ -21,9 +21,8 @@ export class ErrorBoundary extends Component<
   }
 
   public override componentDidCatch(error: Error, info: ErrorInfo) {
-    // Logging
     console.error(
-      `[React Bridge] Error in component ${this.props.name || 'Unknown'}:`,
+      `Error in component ${this.props.name || 'Unknown'}:`,
       error,
       info,
     );

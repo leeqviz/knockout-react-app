@@ -1,4 +1,4 @@
 export {
   datepickerComponentMeta,
   datepickerLazyComponentMeta,
-} from './datepicker';
+} from './datepicker.meta';

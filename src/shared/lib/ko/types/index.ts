@@ -1,9 +1,9 @@
 export type {
   KnockoutComponentMeta,
   ReactComponentViewModelParams,
-} from './components';
+} from './component';
 export type {
   KnockoutObservableArrayWithDispose,
   KnockoutObservableWithDispose,
   StoreSyncConfig,
-} from './extenders';
+} from './extender';
