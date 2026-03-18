@@ -1,4 +1,1 @@
-declare module '*.css' {
-  const classes: { [className: string]: string };
-  export default classes;
-}
+/// <reference types="vite/client" />

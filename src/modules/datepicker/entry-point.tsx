@@ -1,10 +1,10 @@
-import { ErrorBoundary } from '@/lib/react/components/error-boundary';
-import { RouterProvider } from '@/lib/react/components/routing';
-import type { RouterContextValue } from '@/lib/react/contexts/routing';
+import { RouterProvider } from '@/shared/router/provider';
+import type { RouterSnapshot } from '@/shared/router/types';
+import { ErrorBoundary } from '@/shared/ui/error-boundary';
 import { DatepickerContainer } from './components/datepicker-container';
 
 export interface DatepickerEntryPointProps {
-  router: RouterContextValue | null;
+  router: RouterSnapshot | null;
 }
 
 export function DatepickerEntryPoint({ router }: DatepickerEntryPointProps) {

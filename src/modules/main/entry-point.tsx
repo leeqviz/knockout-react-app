@@ -1,10 +1,9 @@
-import { ErrorBoundary } from '@/lib/react/components/error-boundary';
-import { RouterProvider } from '@/lib/react/components/routing';
-import type { RouterContextValue } from '@/lib/react/contexts/routing';
+import { RouterProvider, type RouterSnapshot } from '@/shared/router';
+import { ErrorBoundary } from '@/shared/ui/error-boundary';
 import { MainContainer } from './components/main-container';
 
 export interface MainEntryPointProps {
-  router: RouterContextValue | null;
+  router: RouterSnapshot | null;
 }
 
 export function MainEntryPoint({ router }: MainEntryPointProps) {

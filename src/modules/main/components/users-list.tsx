@@ -1,4 +1,4 @@
-import { useAppStore } from '@/lib/react/hooks/state-management';
+import { useAppStore } from '@/shared/store';
 
 export function UsersList() {
   const users = useAppStore((state) => state.users);
