@@ -1,18 +1,18 @@
 import { ko } from '@/shared/lib/ko';
 import type { RouterSnapshot } from '@/shared/router';
-import type { ComponentType } from 'react';
+import type { ReactBindingOptions } from '../bindings';
 import { appRouter } from '../router';
 import { BaseViewModel } from './base.model';
 
-type ReactComponentProps = {
+interface ReactComponentProps {
   [key: string]: unknown;
-};
+}
 
 export abstract class ReactComponentViewModel<
   T = ReactComponentProps,
 > extends BaseViewModel {
-  public abstract computedProps: KnockoutComputed<T>;
-  public abstract component: ComponentType<T>;
+  protected abstract computedProps: KnockoutComputed<T>;
+  public abstract binding: ReactBindingOptions<T>;
 
   public constructor() {
     super();
@@ -32,7 +32,7 @@ type ReactComponentPropsWithRouter = ReactComponentProps & {
 };
 
 export abstract class ReactComponentWithRouterViewModel extends ReactComponentViewModel<ReactComponentPropsWithRouter> {
-  public computedProps: KnockoutComputed<ReactComponentPropsWithRouter>;
+  protected computedProps: KnockoutComputed<ReactComponentPropsWithRouter>;
 
   public constructor(params: ReactComponentWithRouterViewModelParams) {
     super();

@@ -1,3 +1,4 @@
+import type { ReactBindingOptions } from '@/app/bindings';
 import {
   ReactComponentWithRouterViewModel,
   type ReactComponentWithRouterViewModelParams,
@@ -6,13 +7,15 @@ import {
   DatepickerEntryPointLazy,
   type DatepickerEntryPointProps,
 } from '@/modules/datepicker';
-import type { ComponentType } from 'react';
 
 export class DatepickerViewModel extends ReactComponentWithRouterViewModel {
-  public component: ComponentType<DatepickerEntryPointProps>;
+  public binding: ReactBindingOptions<DatepickerEntryPointProps>;
 
   public constructor(params: ReactComponentWithRouterViewModelParams) {
     super(params);
-    this.component = DatepickerEntryPointLazy;
+    this.binding = {
+      component: DatepickerEntryPointLazy,
+      props: this.computedProps(),
+    };
   }
 }

@@ -7,7 +7,6 @@ export interface MainEntryPointProps {
 }
 
 export function MainEntryPoint({ router }: MainEntryPointProps) {
-  console.log('MainEntryPoint router: ', router);
   return (
     <ErrorBoundary name="Main Module">
       <RouterProvider value={router}>

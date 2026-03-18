@@ -11,7 +11,6 @@ import { UsersList } from './users-list';
 
 export function MainContainer() {
   const router = useRouter();
-  console.log('MainContainer router: ', router);
 
   useEffect(() => {
     const payload: AppEventPayloadMap['react/component-render'] = {

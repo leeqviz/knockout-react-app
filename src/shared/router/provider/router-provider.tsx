@@ -7,6 +7,7 @@ interface RouterProviderProps extends PropsWithChildren {
 }
 
 export function RouterProvider({ children, value }: RouterProviderProps) {
+  console.log('Router: ', value);
   return (
     <RouterContext.Provider value={value}>{children}</RouterContext.Provider>
   );
