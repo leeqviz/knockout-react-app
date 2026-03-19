@@ -7,15 +7,20 @@ import {
   DatepickerEntryPointLazy,
   type DatepickerEntryPointProps,
 } from '@/modules/datepicker';
+import { ko } from '@/shared/lib/ko';
 
-export class DatepickerViewModel extends ReactComponentWithRouterViewModel {
-  public bindingOptions: ReactBindingOptions<DatepickerEntryPointProps>;
+export class DatepickerViewModel extends ReactComponentWithRouterViewModel<DatepickerEntryPointProps> {
+  public bindingOptions: KnockoutComputed<
+    ReactBindingOptions<DatepickerEntryPointProps>
+  >;
 
   public constructor(params: ReactComponentWithRouterViewModelParams) {
     super(params);
-    this.bindingOptions = {
-      component: DatepickerEntryPointLazy,
-      props: this.computedProps(),
-    };
+    this.bindingOptions = ko.pureComputed(
+      (): ReactBindingOptions<DatepickerEntryPointProps> => ({
+        component: DatepickerEntryPointLazy,
+        props: this.props,
+      }),
+    );
   }
 }

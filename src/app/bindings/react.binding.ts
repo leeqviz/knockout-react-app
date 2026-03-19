@@ -9,9 +9,11 @@ interface HTMLElementWithReactRoot extends HTMLElement {
 }
 
 // Custom binding configuration
-export interface ReactBindingOptions<T = unknown> {
+export interface ReactBindingOptions<
+  T extends object = Record<string, unknown>,
+> {
   component?: ElementType<T> | undefined;
-  props?: (Record<string, unknown> & T) | undefined;
+  props?: T | undefined;
   deepUnwrap?: boolean | undefined; // for deep unwrapping of nested observables, if needed
 }
 

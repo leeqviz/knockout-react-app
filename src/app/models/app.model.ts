@@ -31,7 +31,7 @@ export class AppViewModel extends BaseViewModel {
 
   // client side routing
   public appRouter: AppRouter;
-  public computedBindingOptions: KnockoutComputed<ComponentBindingOptions>;
+  public bindingOptions: KnockoutComputed<ComponentBindingOptions>;
 
   public constructor() {
     super();
@@ -75,7 +75,7 @@ export class AppViewModel extends BaseViewModel {
     );
     this.appRouter = appRouter;
     this.appRouter.start();
-    this.computedBindingOptions = ko.pureComputed(
+    this.bindingOptions = ko.pureComputed(
       (): ComponentBindingOptions => ({
         name: appRouter.currentComponent(),
         params: { withRouter: true },
@@ -100,7 +100,7 @@ export class AppViewModel extends BaseViewModel {
     this.users.dispose?.();
 
     this.result.dispose();
-    this.computedBindingOptions.dispose();
+    this.bindingOptions.dispose();
 
     this.eventSubscription.dispose();
     appRouter.dispose();
