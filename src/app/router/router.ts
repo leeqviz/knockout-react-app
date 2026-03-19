@@ -1,5 +1,5 @@
 import { BaseRouter, type RouterOptions } from '@/shared/router';
-import { appRoutes } from './constants';
+import { appRoutes } from './routes';
 
 export class AppRouter extends BaseRouter {
   private static instance: AppRouter | null = null;

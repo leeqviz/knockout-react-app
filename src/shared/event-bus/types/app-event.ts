@@ -1,4 +1,4 @@
-import type { AppEvent } from '../constants';
+import type { AppEvent } from '../app-event';
 
 // get AppEvent values as type union because AppEvent has not only one key
 export type AppEventName = (typeof AppEvent)[keyof typeof AppEvent];

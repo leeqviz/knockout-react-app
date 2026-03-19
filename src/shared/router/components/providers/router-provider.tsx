@@ -1,6 +1,5 @@
+import { RouterContext, type RouterSnapshot } from '@/shared/router';
 import type { PropsWithChildren } from 'react';
-import { RouterContext } from '../context';
-import type { RouterSnapshot } from '../types';
 
 interface RouterProviderProps extends PropsWithChildren {
   value: RouterSnapshot | null;

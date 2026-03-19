@@ -1,5 +1,5 @@
 import { createStore } from 'zustand/vanilla';
-import { initialAppStateData } from './constants';
+import { initialAppStateData } from './initial-app-state';
 import type { AppState } from './types';
 
 export const appStore = createStore<AppState>((set) => ({

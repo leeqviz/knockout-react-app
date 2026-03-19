@@ -3,9 +3,10 @@ import {
   mainComponentMeta,
   notFoundComponentMeta,
 } from '@/app/components';
-import { requireAuth } from '../middlewares';
+import type { RouteConfig } from '@/shared/router';
+import { requireAuth } from './middlewares';
 
-export const appRoutes = [
+export const appRoutes: RouteConfig[] = [
   { pattern: '/', component: mainComponentMeta.name },
   {
     pattern: '/test',

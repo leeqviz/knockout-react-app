@@ -1,8 +1,7 @@
-export { Link } from './components';
-export { RouterContext } from './context';
+export { Link, RouterProvider } from './components';
 export { useRouter } from './hooks';
-export { RouterProvider } from './provider';
 export { BaseRouter } from './router';
+export { RouterContext } from './router-context';
 export type {
   NavigateOptions,
   ResolvedRouteState,
