@@ -1,3 +1,4 @@
+import { ResolveResultType } from '../route';
 import type { RouteMiddleware } from './middleware';
 
 export interface RouteConfig {
@@ -23,6 +24,8 @@ export interface ResolvedRouteState {
 }
 
 export type ResolveResult =
-  | { type: 'blocked'; reason?: string }
-  | { type: 'redirect'; to: string }
-  | { type: 'resolved'; value: ResolvedRouteState };
+  | { type: typeof ResolveResultType.Blocked; reason?: string }
+  | { type: typeof ResolveResultType.Redirect; to: string; replace?: boolean }
+  | { type: typeof ResolveResultType.Rewrite; to: string; replace?: boolean }
+  | { type: typeof ResolveResultType.Resolved; value: ResolvedRouteState }
+  | { type: typeof ResolveResultType.Error; error: Error };

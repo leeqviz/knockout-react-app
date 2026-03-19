@@ -1,4 +1,5 @@
 import { ko } from '@/shared/lib/ko';
+import { ResolveResultType } from './route';
 import type {
   NavigateOptions,
   ResolvedRouteState,
@@ -73,17 +74,28 @@ export class BaseRouter {
     const fullPath = window.location.pathname + window.location.search;
     const result = this.resolvePath(fullPath, window.history.state ?? null);
 
-    if (result.type === 'redirect') {
+    if (result.type === ResolveResultType.Error) {
+      throw result.error;
+    }
+
+    if (result.type === ResolveResultType.Blocked) {
+      return;
+    }
+
+    if (result.type === ResolveResultType.Rewrite) {
+      // TODO: handle rewrite
+      return;
+    }
+
+    if (result.type === ResolveResultType.Redirect) {
       this.navigate(result.to, {
-        replace: true,
+        replace: result.replace ?? false,
         state: null,
       });
       return;
     }
 
-    if (result.type === 'resolved') {
-      this.applyState(result.value);
-    }
+    this.applyState(result.value);
   }
 
   public dispose(): void {
@@ -117,16 +129,28 @@ export class BaseRouter {
 
     const result = this.resolvePath(nextFullPath, nextState);
 
-    if (result.type === 'blocked') {
+    if (result.type === ResolveResultType.Error) {
+      throw result.error;
+    }
+
+    if (result.type === ResolveResultType.Blocked) {
       return;
     }
 
-    if (result.type === 'redirect') {
+    if (result.type === ResolveResultType.Rewrite) {
+      // TODO: handle rewrite
+      return;
+    }
+
+    if (result.type === ResolveResultType.Redirect) {
       if (result.to === nextFullPath) {
         return;
       }
 
-      this.navigate(result.to, { replace: true, state: nextState });
+      this.navigate(result.to, {
+        replace: result.replace ?? false,
+        state: nextState,
+      });
       return;
     }
 
@@ -181,12 +205,21 @@ export class BaseRouter {
 
     const result = this.resolvePath(nextFullPath, nextState);
 
-    if (result.type === 'blocked') {
+    if (result.type === ResolveResultType.Error) {
+      throw result.error;
+    }
+
+    if (result.type === ResolveResultType.Blocked) {
       window.history.replaceState(previousState ?? null, '', previousFullPath);
       return;
     }
 
-    if (result.type === 'redirect') {
+    if (result.type === ResolveResultType.Rewrite) {
+      // TODO: handle rewrite
+      return;
+    }
+
+    if (result.type === ResolveResultType.Redirect) {
       if (result.to === nextFullPath) {
         window.history.replaceState(
           previousState ?? null,
@@ -197,7 +230,7 @@ export class BaseRouter {
       }
 
       this.navigate(result.to, {
-        replace: true,
+        replace: result.replace ?? false,
         state: null,
       });
       return;
@@ -233,7 +266,7 @@ export class BaseRouter {
       if (middlewareResult) return middlewareResult;
 
       return {
-        type: 'resolved',
+        type: ResolveResultType.Resolved,
         value: {
           pathname,
           search,
@@ -246,7 +279,7 @@ export class BaseRouter {
     }
 
     return {
-      type: 'resolved',
+      type: ResolveResultType.Resolved,
       value: {
         pathname,
         search,

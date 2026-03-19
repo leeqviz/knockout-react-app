@@ -1,7 +1,8 @@
-import type {
-  RouteMiddleware,
-  RouteMiddlewareContext,
-  RouteMiddlewareResult,
+import {
+  ResolveResultType,
+  type RouteMiddleware,
+  type RouteMiddlewareContext,
+  type RouteMiddlewareResult,
 } from '@/shared/router';
 import { appStore } from '@/shared/store';
 
@@ -16,6 +17,9 @@ export const requireAuth: RouteMiddleware = (
 
     const redirectUrl = encodeURIComponent(context.fullPath);
 
-    return { type: 'redirect', to: `/login?redirectTo=${redirectUrl}` };
+    return {
+      type: ResolveResultType.Redirect,
+      to: `/login?redirectTo=${redirectUrl}`,
+    };
   }
 };
