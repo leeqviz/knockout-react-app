@@ -126,6 +126,7 @@ export class BaseRouter {
       else window.history.pushState(nextState, '', fullUrlWithHash);
 
       this.currentHash(nextHash);
+      this.currentHistoryState(nextState);
       this.scheduleScrollToFragment(nextHash);
       return;
     }
