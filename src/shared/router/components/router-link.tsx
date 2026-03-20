@@ -1,5 +1,5 @@
-import { useRouter } from '@/shared/router';
 import React, { type AnchorHTMLAttributes } from 'react';
+import { useRouter } from '../hooks';
 
 interface RouterLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   to: string;
