@@ -48,6 +48,8 @@ export interface RouterOptions<
   onNavigationBlocked?: NavigationBlockedHook<TMeta>;
   onNavigationError?: NavigationErrorHook;
   debug?: boolean; // TODO: debug mode
+  base?: string;
+  caseSensitive?: boolean;
   confirmLeave?: (
     to: NavigationLocation,
     from: ResolvedRouteState<TMeta> | null,
@@ -83,7 +85,7 @@ export interface RouterSnapshot<
     params?: RouteParams,
     search?: BuildPathSearch,
   ) => string;
-
+  createHref: (path: string) => string;
   back: () => void;
   forward: () => void;
   go: (delta: number) => void;
@@ -95,6 +97,7 @@ export interface RouterSnapshot<
   route: {
     name: string | undefined;
     meta: TMeta | undefined;
+    pattern: string | undefined;
   };
   location: {
     pathname: string;

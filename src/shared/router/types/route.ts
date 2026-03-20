@@ -41,6 +41,7 @@ export interface ResolvedRouteState<
   hash: string;
   name: string | undefined;
   meta: TMeta | undefined;
+  pattern: string | undefined;
 }
 
 export interface ResolvedRouteInfo<
@@ -51,6 +52,7 @@ export interface ResolvedRouteInfo<
   component: string;
   params: RouteParams;
   pattern: string;
+  searchParams: SearchParams;
 }
 
 export type BlockedResult = {

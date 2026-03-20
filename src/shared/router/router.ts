@@ -37,6 +37,8 @@ export class BaseRouter<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 > {
   public readonly routes: RouteConfig<TMeta>[];
+  protected readonly base: string;
+  protected readonly caseSensitive: boolean;
   protected middlewares: RouteMiddleware<TMeta>[];
   protected scrollPositions = new Map<string, ScrollPosition>();
   protected currentHistoryKey: string = '';
@@ -66,6 +68,7 @@ export class BaseRouter<
   public currentHash: KnockoutObservable<string>;
   public currentRouteName: KnockoutObservable<string | undefined>;
   public currentMeta: KnockoutObservable<TMeta | undefined>;
+  public currentPattern: KnockoutObservable<string | undefined>;
 
   protected static readonly defaultScrollBehavior: ScrollBehaviorFn = (
     _to,
@@ -141,6 +144,8 @@ export class BaseRouter<
 
   protected constructor(options?: RouterOptions<TMeta>) {
     this.routes = this.rankRoutes(options?.routes ?? []);
+    this.base = this.normalizeBase(options?.base ?? '');
+    this.caseSensitive = options?.caseSensitive ?? false;
     this.middlewares = options?.middlewares || [];
     this.scrollBehavior =
       options?.scrollBehavior ??
@@ -155,17 +160,19 @@ export class BaseRouter<
       : false;
 
     const initialUrl = new URL(window.location.href);
+    const strippedPathname = this.normalizePath(
+      this.stripBase(initialUrl.pathname),
+    );
     const initialMatch = this.routes.find((r) =>
-      this.matchRoute(r.pattern, initialUrl.pathname),
+      this.matchRoute(r.pattern, strippedPathname),
     );
 
     this.currentComponent = ko.observable(initialMatch?.component ?? '');
     this.currentRouteName = ko.observable(initialMatch?.name);
     this.currentMeta = ko.observable(initialMatch?.meta);
     this.currentParams = ko.observable({});
-    this.currentPathname = ko.observable(
-      this.normalizePath(initialUrl.pathname),
-    );
+    this.currentPattern = ko.observable(initialMatch?.pattern);
+    this.currentPathname = ko.observable(strippedPathname);
     this.currentSearch = ko.observable(initialUrl.search);
     this.currentSearchParams = ko.observable(
       this.parseUrl(initialUrl).searchParams,
@@ -197,7 +204,7 @@ export class BaseRouter<
       window.history.replaceState(
         this.wrapState(userState, key),
         '',
-        fullPath + initialHash,
+        this.addBase(fullPath) + initialHash,
       );
     }
 
@@ -301,7 +308,7 @@ export class BaseRouter<
     }
 
     if (samePath && sameState && !sameHash) {
-      const fullUrlWithHash = currentFullPath + nextHash;
+      const fullUrlWithHash = this.addBase(currentFullPath) + nextHash;
 
       if (options?.replace) {
         window.history.replaceState(
@@ -362,7 +369,8 @@ export class BaseRouter<
         if (!handled) throw res.error;
       },
       onResolved: (res) => {
-        const normalizedPath = res.value.pathname + res.value.search + nextHash;
+        const normalizedPath =
+          this.addBase(res.value.pathname + res.value.search) + nextHash;
 
         if (options?.replace) {
           window.history.replaceState(
@@ -391,7 +399,7 @@ export class BaseRouter<
 
   protected normalizeFullPath = (fullPath: string): string => {
     const url = new URL(fullPath, window.location.origin);
-    return this.normalizePath(url.pathname) + url.search;
+    return this.normalizePath(this.stripBase(url.pathname)) + url.search;
   };
 
   public getSnapshot = (): RouterSnapshot<TMeta> => {
@@ -400,7 +408,7 @@ export class BaseRouter<
       navigateExternal: this.navigateExternal,
       navigateByName: this.navigateByName,
       buildPath: this.buildPath,
-
+      createHref: this.createHref,
       back: this.back,
       forward: this.forward,
       go: this.go,
@@ -412,6 +420,7 @@ export class BaseRouter<
       route: {
         name: this.currentRouteName(),
         meta: this.currentMeta(),
+        pattern: this.currentPattern(),
       },
       location: {
         pathname: this.currentPathname(),
@@ -469,7 +478,7 @@ export class BaseRouter<
         window.history.replaceState(
           this.wrapState(previousState, previousHistoryKey),
           '',
-          previousFullPath + previousHash,
+          this.addBase(previousFullPath) + previousHash,
         );
         this.notifyNavigationBlocked(to);
         return;
@@ -495,7 +504,7 @@ export class BaseRouter<
         window.history.replaceState(
           this.wrapState(previousState, previousHistoryKey),
           '',
-          previousFullPath + previousHash,
+          this.addBase(previousFullPath) + previousHash,
         );
         this.notifyNavigationBlocked({
           pathname: originalUrl.pathname,
@@ -510,7 +519,7 @@ export class BaseRouter<
           window.history.replaceState(
             this.wrapState(previousState, previousHistoryKey),
             '',
-            previousFullPath + previousHash,
+            this.addBase(previousFullPath) + previousHash,
           );
           return;
         }
@@ -602,6 +611,7 @@ export class BaseRouter<
           state,
           name: res.value.name,
           meta: res.value.meta,
+          pattern: res.value.pattern,
         };
         this.applyState(nextRouteState);
         this.notifyAfterNavigate(nextRouteState);
@@ -641,7 +651,7 @@ export class BaseRouter<
         route.queryParams,
       );
       if (!queryResult.valid) {
-        return { type: ResolveResultType.Blocked };
+        continue;
       }
 
       const middlewareResult = this.runMiddlewares(route.middlewares ?? [], {
@@ -665,6 +675,7 @@ export class BaseRouter<
           state,
           name: route.name,
           meta: route.meta,
+          pattern: route.pattern,
         },
       };
     }
@@ -681,6 +692,7 @@ export class BaseRouter<
         state,
         name: undefined,
         meta: undefined,
+        pattern: undefined,
       },
     };
   };
@@ -761,6 +773,7 @@ export class BaseRouter<
     this.currentHistoryState(nextState.state);
     this.currentRouteName(nextState.name);
     this.currentMeta(nextState.meta);
+    this.currentPattern(nextState.pattern);
   };
 
   protected scheduleScrollToFragment = (hash: string): void => {
@@ -833,7 +846,8 @@ export class BaseRouter<
 
   protected getCurrentFullPath = (): string => {
     return (
-      this.normalizePath(window.location.pathname) + window.location.search
+      this.normalizePath(this.stripBase(window.location.pathname)) +
+      window.location.search
     );
   };
 
@@ -971,7 +985,11 @@ export class BaseRouter<
       );
     }
 
-    if (pathSegment === undefined || patternSegment !== pathSegment) {
+    const segmentsMatch = this.caseSensitive
+      ? patternSegment === pathSegment
+      : patternSegment.toLowerCase() === pathSegment?.toLowerCase();
+
+    if (pathSegment === undefined || !segmentsMatch) {
       return null;
     }
 
@@ -1033,6 +1051,7 @@ export class BaseRouter<
     state: this.currentHistoryState(),
     name: this.currentRouteName(),
     meta: this.currentMeta(),
+    pattern: this.currentPattern(),
   });
 
   protected applyScrollTarget = (target: ScrollTarget): void => {
@@ -1280,7 +1299,12 @@ export class BaseRouter<
         .pathname,
     );
     const current = this.currentPathname();
-    return current === normalized || current.startsWith(normalized + '/');
+    if (this.caseSensitive) {
+      return current === normalized || current.startsWith(normalized + '/');
+    }
+    const n = normalized.toLowerCase();
+    const c = current.toLowerCase();
+    return c === n || c.startsWith(n + '/');
   };
 
   public isExact = (path: string): boolean => {
@@ -1288,7 +1312,10 @@ export class BaseRouter<
       new URL(path.startsWith('/') ? path : `/${path}`, window.location.origin)
         .pathname,
     );
-    return this.currentPathname() === normalized;
+    const current = this.currentPathname();
+    return this.caseSensitive
+      ? current === normalized
+      : current.toLowerCase() === normalized.toLowerCase();
   };
 
   public isNameActive = (name: string): boolean => {
@@ -1345,7 +1372,10 @@ export class BaseRouter<
     return { valid: true, searchParams: result };
   };
 
-  public resolveRoute = (path: string): ResolvedRouteInfo<TMeta> | null => {
+  public resolveRoute = (
+    path: string,
+    options?: { runMiddlewares?: boolean },
+  ): ResolvedRouteInfo<TMeta> | null => {
     let url: URL;
     try {
       url = this.resolveTo(path);
@@ -1353,7 +1383,16 @@ export class BaseRouter<
       return null;
     }
 
-    const { pathname } = this.parseUrl(url);
+    const { pathname, searchParams } = this.parseUrl(url);
+
+    if (options?.runMiddlewares) {
+      const globalResult = this.runMiddlewares(this.middlewares, {
+        pathname,
+        search: url.search,
+        state: null,
+      });
+      if (globalResult) return null;
+    }
 
     for (const route of this.routes) {
       const match = this.matchRoute(route.pattern, pathname);
@@ -1364,12 +1403,35 @@ export class BaseRouter<
       )
         continue;
 
+      const queryResult = this.applyQueryParamConfig(
+        searchParams,
+        route.queryParams,
+      );
+      if (!queryResult.valid) continue;
+
+      if (options?.runMiddlewares && route.middlewares?.length) {
+        const routeResult = this.runMiddlewares(route.middlewares, {
+          pathname,
+          search: url.search,
+          state: null,
+          meta: route.meta,
+        });
+        if (routeResult) {
+          if (routeResult.type === ResolveResultType.Error) {
+            return null;
+          } else {
+            continue;
+          }
+        }
+      }
+
       return {
         name: route.name,
         meta: route.meta as TMeta | undefined,
         component: route.component,
         params: match,
         pattern: route.pattern,
+        searchParams: queryResult.searchParams,
       };
     }
 
@@ -1394,7 +1456,9 @@ export class BaseRouter<
     }
 
     if (parsed.origin === window.location.origin) {
-      this.navigate(parsed.pathname + parsed.search + parsed.hash);
+      const internalPath =
+        this.stripBase(parsed.pathname) + parsed.search + parsed.hash;
+      this.navigate(internalPath);
       return;
     }
 
@@ -1403,5 +1467,31 @@ export class BaseRouter<
     } else {
       window.location.href = url;
     }
+  };
+
+  protected normalizeBase = (base: string): string => {
+    if (!base || base === '/') return '';
+    return base.endsWith('/') ? base.slice(0, -1) : base;
+  };
+
+  protected stripBase = (pathname: string): string => {
+    if (!this.base) return pathname;
+    if (pathname === this.base) return '/';
+    if (pathname.startsWith(this.base + '/'))
+      return pathname.slice(this.base.length);
+    return pathname;
+  };
+
+  protected addBase = (pathname: string): string => {
+    if (!this.base) return pathname;
+    if (pathname === '/') return this.base + '/';
+    return this.base + pathname;
+  };
+
+  public createHref = (path: string): string => {
+    const url = this.resolveTo(path);
+    return (
+      this.addBase(this.normalizePath(url.pathname)) + url.search + url.hash
+    );
   };
 }

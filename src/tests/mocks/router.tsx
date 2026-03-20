@@ -13,7 +13,8 @@ export const mockedRouterContextValue: RouterSnapshot = {
   hasRoute: vi.fn(),
   navigateExternal: vi.fn(),
   resolveRoute: vi.fn(),
-  route: { name: undefined, meta: undefined },
+  createHref: vi.fn(),
+  route: { name: undefined, meta: undefined, pattern: undefined },
   params: {},
   searchParams: {},
   location: {
