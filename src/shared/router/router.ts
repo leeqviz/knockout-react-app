@@ -54,11 +54,15 @@ export class BaseRouter {
 
   public start = (): void => {
     if (this.isStarted) return;
-
     this.isStarted = true;
     window.addEventListener('popstate', this.handlePopState);
+
     const fullPath = this.getCurrentFullPath();
-    const result = this.resolvePath(fullPath, window.history.state ?? null);
+    const state = window.history.state ?? null;
+    const originalUrl = this.parseUrl(
+      new URL(fullPath, window.location.origin),
+    );
+    const result = this.resolvePath(fullPath, state);
 
     this.handleResolveResult(result, {
       onBlocked: () => {},
@@ -68,8 +72,8 @@ export class BaseRouter {
           state: null,
         });
       },
-      onRewrite: () => {
-        // TODO: handle rewrite
+      onRewrite: (res) => {
+        this.resolveRewrite(originalUrl, res.to, state);
       },
       onError: (res) => {
         throw res.error;
@@ -102,6 +106,9 @@ export class BaseRouter {
     const nextFullPath = this.normalizePath(nextUrl.pathname) + nextUrl.search;
     const currentFullPath = this.getCurrentFullPath();
     const nextState = options?.state ?? null;
+    const originalUrl = this.parseUrl(
+      new URL(nextFullPath, window.location.origin),
+    );
 
     const samePath = currentFullPath === nextFullPath;
     const sameState = window.history.state === nextState;
@@ -120,8 +127,8 @@ export class BaseRouter {
           state: nextState,
         });
       },
-      onRewrite: () => {
-        // TODO: handle rewrite
+      onRewrite: (res) => {
+        this.resolveRewrite(originalUrl, res.to, nextState);
       },
       onError: (res) => {
         throw res.error;
@@ -181,7 +188,9 @@ export class BaseRouter {
     const previousState = this.currentHistoryState();
     const nextFullPath = this.getCurrentFullPath();
     const nextState = window.history.state ?? null;
-
+    const originalUrl = this.parseUrl(
+      new URL(nextFullPath, window.location.origin),
+    );
     const result = this.resolvePath(nextFullPath, nextState);
 
     this.handleResolveResult(result, {
@@ -207,14 +216,56 @@ export class BaseRouter {
           state: null,
         });
       },
-      onRewrite: () => {
-        // TODO: handle rewrite
+      onRewrite: (res) => {
+        this.resolveRewrite(originalUrl, res.to, nextState);
       },
       onError: (res) => {
         throw res.error;
       },
       onResolved: (res) => {
         this.applyState(res.value);
+      },
+    });
+  };
+
+  protected resolveRewrite = (
+    originalUrl: {
+      pathname: string;
+      search: string;
+      searchParams: RouteParams;
+    },
+    rewriteTo: string,
+    state: unknown,
+    depth: number = 0,
+  ): void => {
+    if (depth > 10) {
+      throw new Error(
+        `BaseRouter: maximum rewrite depth exceeded at "${rewriteTo}"`,
+      );
+    }
+
+    const result = this.resolvePath(rewriteTo, state);
+
+    this.handleResolveResult(result, {
+      onBlocked: () => {},
+      onRedirect: (res) => {
+        this.navigate(res.to, { replace: res.replace ?? false, state });
+      },
+      onRewrite: (res) => {
+        this.resolveRewrite(originalUrl, res.to, state, depth + 1);
+      },
+      onError: (res) => {
+        throw res.error;
+      },
+      onResolved: (res) => {
+        this.applyState({
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          searchParams: originalUrl.searchParams,
+          component: res.value.component,
+          params: res.value.params,
+          state,
+        });
       },
     });
   };
