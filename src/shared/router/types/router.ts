@@ -67,6 +67,11 @@ export interface RouterSnapshot {
     search?: BuildPathSearch,
   ) => string;
 
+  back: () => void;
+  forward: () => void;
+  go: (delta: number) => void;
+  hasRoute: (name: string) => boolean;
+
   params: RouteParams;
   searchParams: SearchParams;
   route: {

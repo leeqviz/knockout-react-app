@@ -359,6 +359,11 @@ export class BaseRouter {
       navigateByName: this.navigateByName,
       buildPath: this.buildPath,
 
+      back: this.back,
+      forward: this.forward,
+      go: this.go,
+      hasRoute: this.hasRoute,
+
       params: this.currentParams(),
       searchParams: this.currentSearchParams(),
       route: {
@@ -540,7 +545,7 @@ export class BaseRouter {
     });
   };
 
-  public resolvePath = (fullPath: string, state: unknown): ResolveResult => {
+  protected resolvePath = (fullPath: string, state: unknown): ResolveResult => {
     const url = new URL(fullPath, window.location.origin);
     const { pathname, search, searchParams, hash } = this.parseUrl(url);
 
@@ -1204,5 +1209,21 @@ export class BaseRouter {
 
   public isNameActive = (name: string): boolean => {
     return this.currentRouteName() === name;
+  };
+
+  public back = (): void => {
+    window.history.back();
+  };
+
+  public forward = (): void => {
+    window.history.forward();
+  };
+
+  public go = (delta: number): void => {
+    window.history.go(delta);
+  };
+
+  public hasRoute = (name: string): boolean => {
+    return this.routes.some((r) => r.name === name);
   };
 }
