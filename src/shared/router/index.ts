@@ -4,11 +4,15 @@ export { ResolveResultType } from './route';
 export { BaseRouter } from './router';
 export { RouterContext } from './router-context';
 export type {
+  AfterNavigateHook,
   BlockedResult,
   BuildPathSearch,
   ErrorResult,
   InternalHistoryState,
   NavigateOptions,
+  NavigationBlockedHook,
+  NavigationErrorHook,
+  NavigationLocation,
   RedirectResult,
   ResolvedResult,
   ResolvedRouteState,

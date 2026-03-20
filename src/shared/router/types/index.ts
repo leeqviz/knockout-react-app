@@ -18,9 +18,13 @@ export type {
   SearchParamValue,
 } from './route';
 export type {
+  AfterNavigateHook,
   BuildPathSearch,
   InternalHistoryState,
   NavigateOptions,
+  NavigationBlockedHook,
+  NavigationErrorHook,
+  NavigationLocation,
   RouterOptions,
   RouterSnapshot,
   ScrollBehaviorFn,

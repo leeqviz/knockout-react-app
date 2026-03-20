@@ -1,11 +1,15 @@
 import { ko } from '@/shared/lib/ko';
 import { ResolveResultType } from './route';
 import type {
+  AfterNavigateHook,
   BlockedResult,
   BuildPathSearch,
   ErrorResult,
   InternalHistoryState,
   NavigateOptions,
+  NavigationBlockedHook,
+  NavigationErrorHook,
+  NavigationLocation,
   RedirectResult,
   ResolvedResult,
   ResolvedRouteState,
@@ -34,6 +38,9 @@ export class BaseRouter {
   protected previousRouteState: ResolvedRouteState | null = null;
   protected readonly scrollBehavior: ScrollBehaviorFn;
   protected readonly stateCompare: (a: unknown, b: unknown) => boolean;
+  protected readonly afterNavigateHook: AfterNavigateHook | undefined;
+  protected readonly onNavigationBlockedHook: NavigationBlockedHook | undefined;
+  protected readonly onNavigationErrorHook: NavigationErrorHook | undefined;
   protected isStarted: boolean = false;
 
   public currentComponent: KnockoutObservable<string>;
@@ -124,6 +131,9 @@ export class BaseRouter {
     this.scrollBehavior =
       options?.scrollBehavior ?? BaseRouter.defaultScrollBehavior;
     this.stateCompare = BaseRouter.resolveComparator(options?.stateCompare);
+    this.afterNavigateHook = options?.afterNavigate;
+    this.onNavigationBlockedHook = options?.onNavigationBlocked;
+    this.onNavigationErrorHook = options?.onNavigationError;
 
     const initialUrl = new URL(window.location.href);
     const initialMatch = this.routes.find((r) =>
@@ -175,7 +185,14 @@ export class BaseRouter {
     const result = this.resolvePath(fullPath, userState);
 
     this.handleResolveResult(result, {
-      onBlocked: () => {},
+      onBlocked: () => {
+        this.notifyNavigationBlocked({
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: originalUrl.hash,
+          state: userState,
+        });
+      },
       onRedirect: (res) => {
         this.navigate(res.to, {
           replace: res.replace ?? false,
@@ -186,11 +203,18 @@ export class BaseRouter {
         this.resolveRewrite(originalUrl, res.to, userState);
       },
       onError: (res) => {
-        throw res.error;
+        const handled = this.notifyNavigationError(res.error, {
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: originalUrl.hash,
+          state: userState,
+        });
+        if (!handled) throw res.error;
       },
       onResolved: (res) => {
         const nextState = { ...res.value, hash: initialHash };
         this.applyState(nextState);
+        this.notifyAfterNavigate(nextState);
         this.handleScroll(nextState, null);
       },
     });
@@ -257,6 +281,7 @@ export class BaseRouter {
 
       this.currentHash(nextHash);
       this.currentHistoryState(nextState);
+      this.notifyAfterNavigate(this.captureCurrentRouteState());
       this.scheduleScrollToFragment(nextHash);
       return;
     }
@@ -267,7 +292,14 @@ export class BaseRouter {
     );
 
     this.handleResolveResult(result, {
-      onBlocked: () => {},
+      onBlocked: () => {
+        this.notifyNavigationBlocked({
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: nextHash,
+          state: nextState,
+        });
+      },
       onRedirect: (res) => {
         if (this.normalizeFullPath(res.to) === nextFullPath) return;
 
@@ -280,7 +312,13 @@ export class BaseRouter {
         this.resolveRewrite(originalUrl, res.to, nextState);
       },
       onError: (res) => {
-        throw res.error;
+        const handled = this.notifyNavigationError(res.error, {
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: nextHash,
+          state: nextState,
+        });
+        if (!handled) throw res.error;
       },
       onResolved: (res) => {
         const normalizedPath = res.value.pathname + res.value.search + nextHash;
@@ -304,6 +342,7 @@ export class BaseRouter {
 
         const nextRouteState = { ...res.value, hash: nextHash };
         this.applyState(nextRouteState);
+        this.notifyAfterNavigate(nextRouteState);
         this.handleScroll(nextRouteState, null);
       },
     });
@@ -332,6 +371,10 @@ export class BaseRouter {
         search: this.currentSearch(),
         state: this.currentHistoryState(),
       },
+
+      isActive: this.isActive,
+      isExact: this.isExact,
+      isNameActive: this.isNameActive,
 
       setSearchParam: this.setSearchParam,
       appendSearchParam: this.appendSearchParam,
@@ -366,6 +409,7 @@ export class BaseRouter {
     if (samePath) {
       this.currentHash(nextHash);
       this.currentHistoryState(nextUserState);
+      this.notifyAfterNavigate(this.captureCurrentRouteState());
       this.scheduleScrollToFragment(nextHash);
       return;
     }
@@ -383,6 +427,12 @@ export class BaseRouter {
           '',
           previousFullPath + previousHash,
         );
+        this.notifyNavigationBlocked({
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: nextHash,
+          state: nextUserState,
+        });
       },
       onRedirect: (res) => {
         if (this.normalizeFullPath(res.to) === nextFullPath) {
@@ -404,11 +454,18 @@ export class BaseRouter {
         this.resolveRewrite(originalUrl, res.to, nextUserState, savedPosition);
       },
       onError: (res) => {
-        throw res.error;
+        const handled = this.notifyNavigationError(res.error, {
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: nextHash,
+          state: nextUserState,
+        });
+        if (!handled) throw res.error;
       },
       onResolved: (res) => {
         const nextRouteState = { ...res.value, hash: nextHash };
         this.applyState(nextRouteState);
+        this.notifyAfterNavigate(nextRouteState);
         this.handleScroll(nextRouteState, savedPosition);
       },
     });
@@ -435,7 +492,14 @@ export class BaseRouter {
     const result = this.resolvePath(rewriteTo, state);
 
     this.handleResolveResult(result, {
-      onBlocked: () => {},
+      onBlocked: () => {
+        this.notifyNavigationBlocked({
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: originalUrl.hash,
+          state,
+        });
+      },
       onRedirect: (res) => {
         this.navigate(res.to, { replace: res.replace ?? false, state });
       },
@@ -449,7 +513,13 @@ export class BaseRouter {
         );
       },
       onError: (res) => {
-        throw res.error;
+        const handled = this.notifyNavigationError(res.error, {
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: originalUrl.hash,
+          state,
+        });
+        if (!handled) throw res.error;
       },
       onResolved: (res) => {
         const nextRouteState = {
@@ -464,12 +534,13 @@ export class BaseRouter {
           meta: res.value.meta,
         };
         this.applyState(nextRouteState);
+        this.notifyAfterNavigate(nextRouteState);
         this.handleScroll(nextRouteState, savedPosition);
       },
     });
   };
 
-  protected resolvePath = (fullPath: string, state: unknown): ResolveResult => {
+  public resolvePath = (fullPath: string, state: unknown): ResolveResult => {
     const url = new URL(fullPath, window.location.origin);
     const { pathname, search, searchParams, hash } = this.parseUrl(url);
 
@@ -1097,5 +1168,41 @@ export class BaseRouter {
   ): void => {
     const path = this.buildPath(name, params, search, hash);
     this.navigate(path, options);
+  };
+
+  protected notifyAfterNavigate = (to: ResolvedRouteState): void => {
+    this.afterNavigateHook?.(to, this.previousRouteState);
+  };
+
+  protected notifyNavigationBlocked = (to: NavigationLocation): void => {
+    this.onNavigationBlockedHook?.(to, this.captureCurrentRouteState());
+  };
+
+  protected notifyNavigationError = (
+    error: unknown,
+    to: NavigationLocation,
+  ): boolean => {
+    return this.onNavigationErrorHook?.(error, to) === true;
+  };
+
+  public isActive = (path: string): boolean => {
+    const normalized = this.normalizePath(
+      new URL(path.startsWith('/') ? path : `/${path}`, window.location.origin)
+        .pathname,
+    );
+    const current = this.currentPathname();
+    return current === normalized || current.startsWith(normalized + '/');
+  };
+
+  public isExact = (path: string): boolean => {
+    const normalized = this.normalizePath(
+      new URL(path.startsWith('/') ? path : `/${path}`, window.location.origin)
+        .pathname,
+    );
+    return this.currentPathname() === normalized;
+  };
+
+  public isNameActive = (name: string): boolean => {
+    return this.currentRouteName() === name;
   };
 }

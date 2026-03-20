@@ -13,11 +13,36 @@ export type StateCompareStrategy =
   | 'deep' // recursive Object.is
   | ((a: unknown, b: unknown) => boolean); // custom
 
+export interface NavigationLocation {
+  pathname: string;
+  search: string;
+  hash: string;
+  state: unknown;
+}
+
+export type AfterNavigateHook = (
+  to: ResolvedRouteState,
+  from: ResolvedRouteState | null,
+) => void;
+
+export type NavigationBlockedHook = (
+  to: NavigationLocation,
+  from: ResolvedRouteState | null,
+) => void;
+
+export type NavigationErrorHook = (
+  error: unknown,
+  to: NavigationLocation,
+) => boolean | void;
+
 export interface RouterOptions {
   routes?: RouteConfig[] | undefined;
   middlewares?: RouteMiddleware[] | undefined;
   scrollBehavior?: ScrollBehaviorFn;
   stateCompare?: StateCompareStrategy;
+  afterNavigate?: AfterNavigateHook;
+  onNavigationBlocked?: NavigationBlockedHook;
+  onNavigationError?: NavigationErrorHook;
 }
 
 export interface NavigateOptions {
@@ -54,6 +79,10 @@ export interface RouterSnapshot {
     hash: string;
     state: unknown;
   };
+
+  isActive: (path: string) => boolean;
+  isExact: (path: string) => boolean;
+  isNameActive: (name: string) => boolean;
 
   setSearchParam: (
     key: string,
