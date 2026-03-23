@@ -5,7 +5,6 @@ import { vi } from 'vitest';
 
 export const mockedRouterContextValue: RouterSnapshot = {
   navigate: vi.fn(),
-  navigateByName: vi.fn(),
   buildPath: vi.fn(),
   back: vi.fn(),
   forward: vi.fn(),
@@ -25,7 +24,6 @@ export const mockedRouterContextValue: RouterSnapshot = {
   },
   isActive: vi.fn(),
   isExact: vi.fn(),
-  isNameActive: vi.fn(),
   setSearchParam: vi.fn(),
   appendSearchParam: vi.fn(),
   deleteSearchParam: vi.fn(),

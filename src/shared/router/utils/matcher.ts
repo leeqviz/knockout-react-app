@@ -1,19 +1,18 @@
 import type {
-  BuildPathSearch,
   QueryParamConfig,
   RouteConfig,
   RouteParams,
-  SearchParams,
+  RouteSearchParams,
 } from '../types';
-import { normalizePath } from './url';
+import { normalizePath } from './path';
 
 export function applyQueryParamConfig(
-  searchParams: SearchParams,
+  searchParams: RouteSearchParams,
   config?: Record<string, QueryParamConfig>,
-): { valid: boolean; searchParams: SearchParams } {
+): { valid: boolean; searchParams: RouteSearchParams } {
   if (!config) return { valid: true, searchParams };
 
-  const result: SearchParams = { ...searchParams };
+  const result: RouteSearchParams = { ...searchParams };
 
   for (const [key, paramConfig] of Object.entries(config)) {
     if (result[key] === undefined) {
@@ -181,7 +180,7 @@ export function buildPathByRoute<
 >(
   route: RouteConfig<TMeta>,
   params?: RouteParams,
-  search?: BuildPathSearch,
+  searchParams?: RouteSearchParams | URLSearchParams,
   hash?: string,
 ): string {
   const segments = normalizePath(route.pattern).split('/').filter(Boolean);
@@ -205,7 +204,7 @@ export function buildPathByRoute<
         resultSegments.push(encodeURIComponent(String(value)));
       else if (!isOptional)
         throw new Error(
-          `missing required param "${paramName}" for route "${name}"`,
+          `Missing required param "${paramName}" for route "${name}"`,
         );
 
       continue;
@@ -217,14 +216,14 @@ export function buildPathByRoute<
   const pathname = '/' + resultSegments.join('/');
   const hashStr = hash ? (hash.startsWith('#') ? hash : `#${hash}`) : '';
 
-  if (!search) return `${pathname}${hashStr}`;
+  if (!searchParams) return `${pathname}${hashStr}`;
 
   const sp =
-    search instanceof URLSearchParams
-      ? search
+    searchParams instanceof URLSearchParams
+      ? searchParams
       : (() => {
           const instance = new URLSearchParams();
-          Object.entries(search).forEach(([key, value]) => {
+          Object.entries(searchParams).forEach(([key, value]) => {
             if (Array.isArray(value)) {
               value.forEach((v) => instance.append(key, v));
             } else {

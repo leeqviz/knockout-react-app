@@ -49,8 +49,4 @@ export function resolveComparator(
   if (strategy === 'shallow') return compareShallow;
   if (strategy === 'deep') return compareDeep;
   return strategy;
-  /* custom
-      if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return a === b;
-      return (a as { id?: unknown }).id === (b as { id?: unknown }).id;
-    */
 }

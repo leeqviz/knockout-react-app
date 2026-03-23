@@ -20,39 +20,21 @@ export interface RouteConfig<
 
 export type RouteParams = Record<string, string>;
 
-export type SearchParamValue = string | string[];
+export type RouteSearchParams = Record<string, string | string[]>;
 
-export type SearchParams = Record<string, SearchParamValue>;
-
-export type SearchParamsPatch = Record<
-  string,
-  string | string[] | null | undefined
->;
-
-export interface ResolvedRouteState<
+export interface RouteState<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 > {
   pathname: string;
   search: string;
   component: string;
   params: RouteParams;
-  searchParams: SearchParams;
+  searchParams: RouteSearchParams;
   state: unknown;
   hash: string;
   name: string | undefined;
   meta: TMeta | undefined;
   pattern: string | undefined;
-}
-
-export interface ResolvedRouteInfo<
-  TMeta extends Record<string, unknown> = Record<string, unknown>,
-> {
-  name: string | undefined;
-  meta: TMeta | undefined;
-  component: string;
-  params: RouteParams;
-  pattern: string;
-  searchParams: SearchParams;
 }
 
 export type BlockedResult = {
@@ -81,14 +63,14 @@ export type ResolvedResult<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 > = {
   type: typeof ResolveResultType.Resolved;
-  value: ResolvedRouteState<TMeta>;
+  value: RouteState<TMeta>;
 };
 
-export type ResolveResult<
+export type RouteResolutionResult<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 > =
   | BlockedResult
   | RedirectResult
   | RewriteResult
-  | ResolvedResult<TMeta>
-  | ErrorResult;
+  | ErrorResult
+  | ResolvedResult<TMeta>;

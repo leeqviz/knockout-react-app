@@ -1,11 +1,9 @@
 import type { RouteMiddleware } from './middleware';
 import type {
-  ResolvedRouteInfo,
-  ResolvedRouteState,
   RouteConfig,
   RouteParams,
-  SearchParams,
-  SearchParamsPatch,
+  RouteSearchParams,
+  RouteState,
 } from './route';
 
 export type StateCompareStrategy =
@@ -13,6 +11,14 @@ export type StateCompareStrategy =
   | 'shallow' // Object.keys + ===
   | 'deep' // recursive Object.is
   | ((a: unknown, b: unknown) => boolean); // custom
+
+export type ScrollBehaviorStrategy<
+  TMeta extends Record<string, unknown> = Record<string, unknown>,
+> = (
+  to: RouteState<TMeta>,
+  from: RouteState<TMeta> | null,
+  position: ScrollToOptions | null,
+) => ScrollToOptions | null;
 
 export interface NavigationLocation {
   pathname: string;
@@ -23,14 +29,11 @@ export interface NavigationLocation {
 
 export type AfterNavigateHook<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
-> = (
-  to: ResolvedRouteState<TMeta>,
-  from: ResolvedRouteState<TMeta> | null,
-) => void;
+> = (to: RouteState<TMeta>, from: RouteState<TMeta> | null) => void;
 
 export type NavigationBlockedHook<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
-> = (to: NavigationLocation, from: ResolvedRouteState<TMeta> | null) => void;
+> = (to: NavigationLocation, from: RouteState<TMeta> | null) => void;
 
 export type NavigationErrorHook = (
   error: unknown,
@@ -42,17 +45,17 @@ export interface RouterOptions<
 > {
   routes?: RouteConfig<TMeta>[] | undefined;
   middlewares?: RouteMiddleware<TMeta>[] | undefined;
-  scrollBehavior?: ScrollBehaviorFn<TMeta>;
+  scrollBehavior?: ScrollBehaviorStrategy<TMeta>;
   stateCompare?: StateCompareStrategy;
   afterNavigate?: AfterNavigateHook<TMeta>;
   onNavigationBlocked?: NavigationBlockedHook<TMeta>;
   onNavigationError?: NavigationErrorHook;
-  debug?: boolean; // TODO: debug mode
+  debug?: boolean;
   base?: string;
   caseSensitive?: boolean;
   confirmLeave?: (
     to: NavigationLocation,
-    from: ResolvedRouteState<TMeta> | null,
+    from: RouteState<TMeta> | null,
   ) => boolean;
   enableBeforeUnload?: boolean;
 }
@@ -66,50 +69,25 @@ export interface NavigateOptions {
 
 export interface NavigateExternalOptions {
   target?: '_blank' | '_self'; // default: '_self'
+  allowAnyProtocol?: boolean;
+}
+
+export interface ResolvedRoute<
+  TMeta extends Record<string, unknown> = Record<string, unknown>,
+> {
+  name: string | undefined;
+  meta: TMeta | undefined;
+  component: string;
+  params: RouteParams;
+  pattern: string;
+  searchParams: RouteSearchParams;
 }
 
 export interface RouterSnapshot<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 > {
   navigate: (path: string, options?: NavigateOptions) => void;
-  navigateExternal: (url: string, options?: NavigateExternalOptions) => void;
-  navigateByName: (
-    name: string,
-    params?: RouteParams,
-    search?: SearchParams,
-    hash?: string,
-    options?: NavigateOptions,
-  ) => void;
-  buildPath: (
-    name: string,
-    params?: RouteParams,
-    search?: BuildPathSearch,
-  ) => string;
-  createHref: (path: string) => string;
-  back: () => void;
-  forward: () => void;
-  go: (delta: number) => void;
-  hasRoute: (name: string) => boolean;
-  resolveRoute: (path: string) => ResolvedRouteInfo<TMeta> | null;
-
-  params: RouteParams;
-  searchParams: SearchParams;
-  route: {
-    name: string | undefined;
-    meta: TMeta | undefined;
-    pattern: string | undefined;
-  };
-  location: {
-    pathname: string;
-    search: string;
-    hash: string;
-    state: unknown;
-  };
-
-  isActive: (path: string) => boolean;
-  isExact: (path: string) => boolean;
-  isNameActive: (name: string) => boolean;
-
+  navigateExternal: (path: string, options?: NavigateExternalOptions) => void;
   setSearchParam: (
     key: string,
     value: string,
@@ -126,33 +104,46 @@ export interface RouterSnapshot<
     options?: NavigateOptions,
   ) => void;
   patchSearchParams: (
-    patch: SearchParamsPatch,
+    patch: Record<string, string | string[] | null | undefined>,
     options?: NavigateOptions,
   ) => void;
   replaceAllSearchParams: (
-    params: SearchParams,
+    searchParams: RouteSearchParams,
     options?: NavigateOptions,
   ) => void;
+
+  back: () => void;
+  forward: () => void;
+  go: (delta: number) => void;
+
+  buildPath: (
+    name: string,
+    params?: RouteParams,
+    search?: RouteSearchParams | URLSearchParams,
+    hash?: string,
+  ) => string;
+  createHref: (path: string) => string;
+  hasRoute: (name: string) => boolean;
+  resolveRoute: (path: string) => ResolvedRoute<TMeta> | null;
+  isActive: (path: string) => boolean;
+  isExact: (path: string) => boolean;
   getSearchParam: (key: string) => string | null;
   getAllSearchParams: (key: string) => string[];
   hasSearchParam: (key: string) => boolean;
+
+  params: RouteParams;
+  searchParams: RouteSearchParams;
+  route: {
+    name?: string | undefined;
+    meta?: TMeta | undefined;
+    pattern?: string | undefined;
+  };
+  location: NavigationLocation;
 }
 
-export type ScrollPosition = { x: number; y: number };
-
-export type ScrollTarget = ScrollPosition | 'top' | 'preserve' | null;
-
-export type ScrollBehaviorFn<
-  TMeta extends Record<string, unknown> = Record<string, unknown>,
-> = (
-  to: ResolvedRouteState<TMeta>,
-  from: ResolvedRouteState<TMeta> | null,
-  savedPosition: ScrollPosition | null,
-) => ScrollTarget;
-
-export interface InternalHistoryState {
-  __routerKey: string;
-  data: unknown;
+export interface ParsedURL {
+  pathname: string;
+  search: string;
+  searchParams: RouteSearchParams;
+  hash: string;
 }
-
-export type BuildPathSearch = SearchParams | URLSearchParams;

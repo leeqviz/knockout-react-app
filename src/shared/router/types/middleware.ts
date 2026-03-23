@@ -1,4 +1,4 @@
-import type { ResolveResult } from './route';
+import type { RouteResolutionResult } from './route';
 
 export interface RouteMiddlewareContext<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
@@ -11,7 +11,7 @@ export interface RouteMiddlewareContext<
 
 export type RouteMiddlewareResult<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
-> = void | ResolveResult<TMeta>;
+> = RouteResolutionResult<TMeta> | void;
 
 export type RouteMiddleware<
   TMeta extends Record<string, unknown> = Record<string, unknown>,

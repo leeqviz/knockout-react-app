@@ -3,11 +3,11 @@ import type {
   ErrorResult,
   RedirectResult,
   ResolvedResult,
-  ResolveResult,
   RewriteResult,
   RouteMiddleware,
   RouteMiddlewareContext,
   RouteMiddlewareResult,
+  RouteResolutionResult,
 } from '../types';
 import { ResolveResultType } from './route';
 
@@ -26,7 +26,7 @@ export function runMiddlewares<
 export function handleResolveResult<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 >(
-  result: ResolveResult<TMeta>,
+  result: RouteResolutionResult<TMeta>,
   options: {
     onBlocked: (result: BlockedResult) => void;
     onError: (result: ErrorResult) => void;

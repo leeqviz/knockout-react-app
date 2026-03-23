@@ -17,21 +17,21 @@ export {
   validateParams,
 } from './matcher';
 export { handleResolveResult, runMiddlewares } from './middleware';
-export { ResolveResultType } from './route';
-export {
-  applyScrollTarget,
-  defaultScrollBehavior,
-  scheduleScrollToFragment,
-  scrollToFragment,
-} from './scroll';
 export {
   addBase,
-  getCurrentFullPath,
+  getFullPath,
   normalizeBase,
   normalizeFullPath,
-  normalizeInputPath,
   normalizePath,
   parseUrl,
   resolveTo,
+  sanitizePath,
   stripBase,
-} from './url';
+} from './path';
+export { AllowedURLProtocols } from './protocols';
+export { ResolveResultType } from './route';
+export {
+  defaultScrollBehavior,
+  scrollToFragment,
+  scrollToTarget,
+} from './scroll';

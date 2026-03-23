@@ -1,38 +1,34 @@
 import { ko } from '@/shared/lib/ko';
 import type {
   AfterNavigateHook,
-  BuildPathSearch,
   NavigateExternalOptions,
   NavigateOptions,
   NavigationBlockedHook,
   NavigationErrorHook,
   NavigationLocation,
-  ResolvedRouteInfo,
-  ResolvedRouteState,
-  ResolveResult,
+  ResolvedRoute,
   RouteConfig,
   RouteMiddleware,
   RouteParams,
+  RouteResolutionResult,
   RouterOptions,
   RouterSnapshot,
-  ScrollBehaviorFn,
-  ScrollPosition,
-  SearchParams,
-  SearchParamsPatch,
+  RouteSearchParams,
+  RouteState,
+  ScrollBehaviorStrategy,
 } from './types';
 import {
   addBase,
+  AllowedURLProtocols,
   applyQueryParamConfig,
-  applyScrollTarget,
   buildPathByRoute,
   defaultScrollBehavior,
   generateHistoryKey,
-  getCurrentFullPath,
+  getFullPath,
   handleResolveResult,
   matchRoute,
   normalizeBase,
   normalizeFullPath,
-  normalizeInputPath,
   normalizePath,
   parseUrl,
   rankRoutes,
@@ -41,7 +37,9 @@ import {
   ResolveResultType,
   resolveTo,
   runMiddlewares,
-  scheduleScrollToFragment,
+  sanitizePath,
+  scrollToFragment,
+  scrollToTarget,
   stripBase,
   validateParams,
   wrapState,
@@ -54,7 +52,7 @@ export class BaseRouter<
   protected readonly base: string;
   protected readonly caseSensitive: boolean;
   protected readonly middlewares: RouteMiddleware<TMeta>[];
-  protected readonly scrollBehavior: ScrollBehaviorFn<TMeta>;
+  protected readonly scrollBehavior: ScrollBehaviorStrategy<TMeta>;
   protected readonly stateCompare: (a: unknown, b: unknown) => boolean;
   protected readonly afterNavigateHook: AfterNavigateHook<TMeta> | undefined;
   protected readonly onNavigationBlockedHook:
@@ -62,22 +60,19 @@ export class BaseRouter<
     | undefined;
   protected readonly onNavigationErrorHook: NavigationErrorHook | undefined;
   protected readonly confirmLeaveHook:
-    | ((
-        to: NavigationLocation,
-        from: ResolvedRouteState<TMeta> | null,
-      ) => boolean)
+    | ((to: NavigationLocation, from: RouteState<TMeta> | null) => boolean)
     | undefined;
   protected readonly enableBeforeUnload: boolean;
-  protected scrollPositions = new Map<string, ScrollPosition>();
+  protected scrollPositions = new Map<string, ScrollToOptions>();
   protected currentHistoryKey: string = '';
-  protected previousRouteState: ResolvedRouteState<TMeta> | null = null;
+  protected previousRouteState: RouteState<TMeta> | null = null;
   protected isStarted: boolean = false;
 
   public currentComponent: KnockoutObservable<string>;
   public currentParams: KnockoutObservable<RouteParams>;
   public currentPathname: KnockoutObservable<string>;
   public currentSearch: KnockoutObservable<string>;
-  public currentSearchParams: KnockoutObservable<SearchParams>;
+  public currentSearchParams: KnockoutObservable<RouteSearchParams>;
   public currentHistoryState: KnockoutObservable<unknown>;
   public currentHash: KnockoutObservable<string>;
   public currentRouteName: KnockoutObservable<string | undefined>;
@@ -130,7 +125,7 @@ export class BaseRouter<
     if (this.enableBeforeUnload)
       window.addEventListener('beforeunload', this.handleBeforeUnload);
 
-    const fullPath = getCurrentFullPath();
+    const fullPath = getFullPath(this.base);
     const initialHash = window.location.hash;
     const rawState = window.history.state;
     const { key, data: userState } = readHistoryState(rawState);
@@ -211,14 +206,12 @@ export class BaseRouter<
     );
 
     if (nextUrl.origin !== window.location.origin)
-      throw new Error(
-        `BaseRouter.navigate: cross-origin path "${path}" is not allowed`,
-      );
+      throw new Error(`Cross-origin path "${path}" is not allowed`);
 
     const nextFullPath = normalizePath(nextUrl.pathname) + nextUrl.search;
     const nextHash = nextUrl.hash;
 
-    const currentFullPath = getCurrentFullPath();
+    const currentFullPath = getFullPath(this.base);
 
     const { data: currentUserState } = readHistoryState(window.history.state);
     const nextState = options?.state ?? null;
@@ -251,7 +244,7 @@ export class BaseRouter<
       this.currentHash(nextHash);
       this.currentHistoryState(nextState);
       this.notifyAfterNavigate(this.captureCurrentRouteState());
-      scheduleScrollToFragment(nextHash);
+      scrollToFragment(nextHash);
       return;
     }
 
@@ -270,7 +263,7 @@ export class BaseRouter<
         });
       },
       onRedirect: (res) => {
-        if (normalizeFullPath(res.to) === nextFullPath) return;
+        if (normalizeFullPath(res.to, this.base) === nextFullPath) return;
 
         this.navigate(res.to, {
           replace: res.replace ?? false,
@@ -326,7 +319,6 @@ export class BaseRouter<
     return {
       navigate: this.navigate,
       navigateExternal: this.navigateExternal,
-      navigateByName: this.navigateByName,
       buildPath: this.buildPath,
       createHref: this.createHref,
       back: this.back,
@@ -351,7 +343,6 @@ export class BaseRouter<
 
       isActive: this.isActive,
       isExact: this.isExact,
-      isNameActive: this.isNameActive,
 
       setSearchParam: this.setSearchParam,
       appendSearchParam: this.appendSearchParam,
@@ -372,7 +363,7 @@ export class BaseRouter<
     const previousState = this.currentHistoryState();
     const previousHistoryKey = this.currentHistoryKey;
 
-    const nextFullPath = getCurrentFullPath();
+    const nextFullPath = getFullPath(this.base);
     const nextHash = window.location.hash;
     const { key: nextKey, data: nextUserState } = readHistoryState(
       window.history.state,
@@ -409,7 +400,7 @@ export class BaseRouter<
       this.currentHash(nextHash);
       this.currentHistoryState(nextUserState);
       this.notifyAfterNavigate(this.captureCurrentRouteState());
-      scheduleScrollToFragment(nextHash);
+      scrollToFragment(nextHash);
       return;
     }
 
@@ -434,7 +425,7 @@ export class BaseRouter<
         });
       },
       onRedirect: (res) => {
-        if (normalizeFullPath(res.to) === nextFullPath) {
+        if (normalizeFullPath(res.to, this.base) === nextFullPath) {
           this.rollbackHistory(
             previousHistoryKey,
             previousState,
@@ -489,17 +480,15 @@ export class BaseRouter<
       pathname: string;
       search: string;
       hash: string;
-      searchParams: SearchParams;
+      searchParams: RouteSearchParams;
     },
     rewriteTo: string,
     state: unknown,
-    savedPosition: ScrollPosition | null = null,
+    savedPosition: ScrollToOptions | null = null,
     depth: number = 0,
   ): void => {
     if (depth > 10)
-      throw new Error(
-        `BaseRouter: maximum rewrite depth exceeded at "${rewriteTo}"`,
-      );
+      throw new Error(`Maximum rewrite depth exceeded at "${rewriteTo}"`);
 
     const result = this.resolvePath(rewriteTo, state);
 
@@ -556,7 +545,7 @@ export class BaseRouter<
   protected resolvePath = (
     fullPath: string,
     state: unknown,
-  ): ResolveResult<TMeta> => {
+  ): RouteResolutionResult<TMeta> => {
     const url = new URL(fullPath, window.location.origin);
     const { pathname, search, searchParams, hash } = parseUrl(url);
 
@@ -628,7 +617,7 @@ export class BaseRouter<
     };
   };
 
-  protected applyState = (nextState: ResolvedRouteState<TMeta>): void => {
+  protected applyState = (nextState: RouteState<TMeta>): void => {
     this.previousRouteState = this.captureCurrentRouteState();
     this.currentPathname(nextState.pathname);
     this.currentSearch(nextState.search);
@@ -645,8 +634,9 @@ export class BaseRouter<
   protected saveCurrentScrollPosition = (): void => {
     if (!this.currentHistoryKey) return;
     this.scrollPositions.set(this.currentHistoryKey, {
-      x: window.scrollX,
-      y: window.scrollY,
+      top: window.scrollX,
+      left: window.scrollY,
+      behavior: 'smooth',
     });
 
     if (this.scrollPositions.size > 50) {
@@ -655,7 +645,7 @@ export class BaseRouter<
     }
   };
 
-  protected captureCurrentRouteState = (): ResolvedRouteState<TMeta> => ({
+  protected captureCurrentRouteState = (): RouteState<TMeta> => ({
     pathname: this.currentPathname(),
     search: this.currentSearch(),
     hash: this.currentHash(),
@@ -669,32 +659,19 @@ export class BaseRouter<
   });
 
   protected handleScroll = (
-    to: ResolvedRouteState<TMeta>,
-    savedPosition: ScrollPosition | null,
+    to: RouteState<TMeta>,
+    position: ScrollToOptions | null,
   ): void => {
     if (to.hash) {
-      scheduleScrollToFragment(to.hash);
+      scrollToFragment(to.hash);
       return;
     }
 
-    const target = this.scrollBehavior(
-      to,
-      this.previousRouteState,
-      savedPosition,
-    );
-    applyScrollTarget(target);
+    scrollToTarget(this.scrollBehavior(to, this.previousRouteState, position));
   };
 
   protected getCurrentSearchInstance = (): URLSearchParams => {
     return new URLSearchParams(this.currentSearch());
-  };
-
-  protected buildUrlWithSearch = (search: URLSearchParams): string => {
-    return (
-      this.currentPathname() +
-      (search.toString() ? `?${search.toString()}` : '') +
-      this.currentHash()
-    );
   };
 
   public getSearchParam = (key: string): string | null => {
@@ -707,6 +684,14 @@ export class BaseRouter<
 
   public hasSearchParam = (key: string): boolean => {
     return this.getCurrentSearchInstance().has(key);
+  };
+
+  protected buildUrlWithSearch = (search: URLSearchParams): string => {
+    return (
+      this.currentPathname() +
+      (search.toString() ? `?${search.toString()}` : '') +
+      this.currentHash()
+    );
   };
 
   protected mutateSearchParam = (
@@ -754,7 +739,7 @@ export class BaseRouter<
   };
 
   public patchSearchParams = (
-    patch: SearchParamsPatch,
+    patch: Record<string, string | string[] | null | undefined>,
     options?: NavigateOptions,
   ): void => {
     this.mutateSearchParam((s) => {
@@ -772,7 +757,7 @@ export class BaseRouter<
   };
 
   public replaceAllSearchParams = (
-    params: SearchParams,
+    params: RouteSearchParams,
     options?: NavigateOptions,
   ): void => {
     const search = new URLSearchParams();
@@ -791,28 +776,17 @@ export class BaseRouter<
   public buildPath = (
     name: string,
     params?: RouteParams,
-    search?: BuildPathSearch,
+    searchParams?: RouteSearchParams | URLSearchParams,
     hash?: string,
   ): string => {
     const route = this.routes.find((r) => r.name === name);
 
-    if (!route)
-      throw new Error(`BaseRouter.buildPath: route "${name}" not found`);
+    if (!route) throw new Error(`Route "${name}" not found`);
 
-    return buildPathByRoute(route, params, search, hash);
+    return buildPathByRoute(route, params, searchParams, hash);
   };
 
-  public navigateByName = (
-    name: string,
-    params?: RouteParams,
-    search?: SearchParams,
-    hash?: string,
-    options?: NavigateOptions,
-  ): void => {
-    this.navigate(this.buildPath(name, params, search, hash), options);
-  };
-
-  protected notifyAfterNavigate = (to: ResolvedRouteState<TMeta>): void => {
+  protected notifyAfterNavigate = (to: RouteState<TMeta>): void => {
     this.afterNavigateHook?.(to, this.previousRouteState);
   };
 
@@ -828,7 +802,7 @@ export class BaseRouter<
   };
 
   public isActive = (path: string): boolean => {
-    const normalized = normalizeInputPath(path);
+    const normalized = sanitizePath(path);
     const current = this.currentPathname();
     if (this.caseSensitive)
       return current === normalized || current.startsWith(normalized + '/');
@@ -839,15 +813,11 @@ export class BaseRouter<
   };
 
   public isExact = (path: string): boolean => {
-    const normalized = normalizeInputPath(path);
+    const normalized = sanitizePath(path);
     const current = this.currentPathname();
     return this.caseSensitive
       ? current === normalized
       : current.toLowerCase() === normalized.toLowerCase();
-  };
-
-  public isNameActive = (name: string): boolean => {
-    return this.currentRouteName() === name;
   };
 
   public back = (): void => {
@@ -869,7 +839,7 @@ export class BaseRouter<
   public resolveRoute = (
     path: string,
     options?: { runMiddlewares?: boolean },
-  ): ResolvedRouteInfo<TMeta> | null => {
+  ): ResolvedRoute<TMeta> | null => {
     let url: URL;
     try {
       url = resolveTo(path, this.currentPathname(), this.currentSearch());
@@ -918,7 +888,7 @@ export class BaseRouter<
 
       return {
         name: route.name,
-        meta: route.meta as TMeta | undefined,
+        meta: route.meta,
         component: route.component,
         params: match,
         pattern: route.pattern,
@@ -930,31 +900,25 @@ export class BaseRouter<
   };
 
   public navigateExternal = (
-    url: string,
+    path: string,
     options?: NavigateExternalOptions,
   ): void => {
-    let parsed: URL;
-    try {
-      parsed = new URL(url);
-    } catch {
-      throw new Error(`BaseRouter.navigateExternal: invalid URL "${url}"`);
-    }
+    const url = new URL(path);
 
-    if (!['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol))
-      throw new Error(
-        `BaseRouter.navigateExternal: unsafe protocol "${parsed.protocol}"`,
-      );
+    if (
+      !options?.allowAnyProtocol &&
+      !AllowedURLProtocols.includes(url.protocol)
+    )
+      throw new Error(`Not allowed protocol "${url.protocol}"`);
 
-    if (parsed.origin === window.location.origin) {
-      const internalPath =
-        stripBase(parsed.pathname, this.base) + parsed.search + parsed.hash;
-      this.navigate(internalPath);
+    if (url.origin === window.location.origin) {
+      this.navigate(stripBase(url.pathname, this.base) + url.search + url.hash);
       return;
     }
 
     if (options?.target === '_blank')
       window.open(url, '_blank', 'noopener,noreferrer');
-    else window.location.href = url;
+    else window.location.href = url.href;
   };
 
   public createHref = (path: string): string => {
