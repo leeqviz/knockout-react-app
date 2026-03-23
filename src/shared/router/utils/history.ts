@@ -1,27 +1,23 @@
-import type { InternalHistoryState } from '../types';
+import type { HistoryState } from '../types';
 
-export function generateHistoryKey(): string {
+export function generateHistoryStateKey(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-export function wrapState(
-  userState: unknown,
+export function wrapHistoryState<T = unknown>(
+  data: T,
   key?: string,
-): InternalHistoryState {
+): HistoryState<T> {
   return {
-    __routerKey: key ?? generateHistoryKey(),
-    data: userState,
+    data,
+    key: key || generateHistoryStateKey(),
   };
 }
 
-export function readHistoryState(raw: unknown): { key: string; data: unknown } {
-  if (
-    raw !== null &&
-    typeof raw === 'object' &&
-    '__routerKey' in (raw as object)
-  ) {
-    const entry = raw as InternalHistoryState;
-    return { key: entry.__routerKey, data: entry.data };
+export function readHistoryState<T = unknown>(raw: unknown): HistoryState<T> {
+  if (raw !== null && typeof raw === 'object' && 'key' in raw) {
+    const entry = raw as HistoryState<T>;
+    return { key: entry.key, data: entry.data };
   }
-  return { key: generateHistoryKey(), data: raw };
+  return { key: generateHistoryStateKey(), data: raw as T };
 }

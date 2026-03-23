@@ -1,4 +1,4 @@
-export interface InternalHistoryState {
-  __routerKey: string;
-  data: unknown;
+export interface HistoryState<T = unknown> {
+  key: string;
+  data: T;
 }

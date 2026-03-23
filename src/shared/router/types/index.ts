@@ -1,4 +1,4 @@
-export type { InternalHistoryState } from './history';
+export type { HistoryState } from './history';
 export type {
   RouteMiddleware,
   RouteMiddlewareContext,

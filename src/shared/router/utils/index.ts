@@ -4,7 +4,11 @@ export {
   compareShallow,
   resolveComparator,
 } from './comparator';
-export { generateHistoryKey, readHistoryState, wrapState } from './history';
+export {
+  generateHistoryStateKey,
+  readHistoryState,
+  wrapHistoryState,
+} from './history';
 export {
   applyQueryParamConfig,
   buildPathByRoute,

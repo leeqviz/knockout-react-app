@@ -23,7 +23,7 @@ import {
   applyQueryParamConfig,
   buildPathByRoute,
   defaultScrollBehavior,
-  generateHistoryKey,
+  generateHistoryStateKey,
   getFullPath,
   handleResolveResult,
   matchRoute,
@@ -42,7 +42,7 @@ import {
   scrollToTarget,
   stripBase,
   validateParams,
-  wrapState,
+  wrapHistoryState,
 } from './utils';
 
 export class BaseRouter<
@@ -131,9 +131,9 @@ export class BaseRouter<
     const { key, data: userState } = readHistoryState(rawState);
     this.currentHistoryKey = key;
 
-    if (!rawState || !('__routerKey' in Object(rawState))) {
+    if (!rawState || !('key' in Object(rawState))) {
       window.history.replaceState(
-        wrapState(userState, key),
+        wrapHistoryState(userState, key),
         '',
         addBase(fullPath, this.base) + initialHash,
       );
@@ -303,15 +303,15 @@ export class BaseRouter<
   ): void => {
     if (replace) {
       window.history.replaceState(
-        wrapState(state, this.currentHistoryKey),
+        wrapHistoryState(state, this.currentHistoryKey),
         '',
         path,
       );
     } else {
       this.saveCurrentScrollPosition();
-      const key = generateHistoryKey();
+      const key = generateHistoryStateKey();
       this.currentHistoryKey = key;
-      window.history.pushState(wrapState(state, key), '', path);
+      window.history.pushState(wrapHistoryState(state, key), '', path);
     }
   };
 
@@ -387,7 +387,7 @@ export class BaseRouter<
       if (!this.confirmLeaveHook(to, this.captureCurrentRouteState())) {
         this.currentHistoryKey = previousHistoryKey;
         window.history.replaceState(
-          wrapState(previousState, previousHistoryKey),
+          wrapHistoryState(previousState, previousHistoryKey),
           '',
           addBase(previousFullPath, this.base) + previousHash,
         );
@@ -469,7 +469,7 @@ export class BaseRouter<
   ): void {
     this.currentHistoryKey = key;
     window.history.replaceState(
-      wrapState(state, key),
+      wrapHistoryState(state, key),
       '',
       addBase(fullPath, this.base) + hash,
     );
