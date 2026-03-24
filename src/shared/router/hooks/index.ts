@@ -1,4 +1,7 @@
+export { useHref } from './use-href';
+export { useLinkClickHandler } from './use-link-click-handler';
 export { useLocation } from './use-location';
+export { useMatch } from './use-match';
 export { useNavigate } from './use-navigate';
 export { useParams } from './use-params';
 export { useRoute } from './use-route';

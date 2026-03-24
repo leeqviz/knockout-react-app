@@ -4,6 +4,7 @@ export {
   compareShallow,
   resolveComparator,
 } from './comparator';
+export { isModifiedEvent } from './events';
 export {
   generateHistoryStateKey,
   readHistoryState,
@@ -31,6 +32,7 @@ export {
   resolveTo,
   sanitizePath,
   stripBase,
+  toPath,
 } from './path';
 export { AllowedURLProtocols } from './protocols';
 export { ResolveResultType } from './route';

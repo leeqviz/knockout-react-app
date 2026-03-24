@@ -1,4 +1,4 @@
-import type { ParsedURL, RouteSearchParams } from '../types';
+import type { ParsedURL, RouteSearchParams, To } from '../types';
 
 export function normalizePath(path: string): string {
   if (!path || path === '/') return '/';
@@ -76,4 +76,9 @@ export function resolveTo(
       currentPathname.endsWith('/') ? currentPathname : `${currentPathname}/`
     }`,
   );
+}
+
+export function toPath(to: To): string {
+  if (typeof to === 'string') return to;
+  return to.pathname + (to.search ?? '') + (to.hash ?? '');
 }

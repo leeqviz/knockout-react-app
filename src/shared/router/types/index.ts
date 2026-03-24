@@ -20,6 +20,7 @@ export type {
 export type {
   AfterNavigateHook,
   BeforeNavigateHook,
+  LinkRenderState,
   MetaTagsResolver,
   NavigateExternalOptions,
   NavigateOptions,
@@ -35,4 +36,5 @@ export type {
   ScrollBehaviorStrategy,
   StateCompareStrategy,
   TitleResolver,
+  To,
 } from './router';

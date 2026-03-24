@@ -97,7 +97,7 @@ export interface NavigateOptions {
 }
 
 export interface NavigateExternalOptions {
-  target?: '_blank' | '_self'; // default: '_self'
+  target?: '_blank' | '_self' | '_parent' | '_top' | (string & {}) | undefined; // default: '_self'
   allowAnyProtocol?: boolean;
 }
 
@@ -176,4 +176,12 @@ export interface ParsedURL {
   search: string;
   searchParams: RouteSearchParams;
   hash: string;
+}
+
+export type To = string | { pathname: string; search?: string; hash?: string };
+
+export interface LinkRenderState {
+  isActive: boolean;
+  isExact: boolean;
+  isNavigating: boolean;
 }

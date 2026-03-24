@@ -3,7 +3,7 @@ import {
   appEventBus,
   type AppEventPayloadMap,
 } from '@/shared/event-bus';
-import { RouterLink, useRouter } from '@/shared/router';
+import { Link, useRouter } from '@/shared/router';
 import { DefaultContainer } from '@/shared/ui/container';
 import { useEffect } from 'react';
 import { LinkedInput } from './linked-input';
@@ -24,7 +24,7 @@ export function MainContainer() {
       <LinkedInput />
       <div className="bg-red-300 h-0.5" />
       <UsersList />
-      <RouterLink to="/test">Go to test</RouterLink>
+      <Link to="/test">Go to test</Link>
       <button onClick={() => router.navigate('/test')}>Go to test</button>
     </DefaultContainer>
   );

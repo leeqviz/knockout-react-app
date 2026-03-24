@@ -1,6 +1,17 @@
-export { RouterLink, RouterProvider } from './components';
 export {
+  Link,
+  Navigate,
+  NavLink,
+  RouterProvider,
+  ScrollRestoration,
+  type LinkProps,
+  type RouterProviderProps,
+} from './components';
+export {
+  useHref,
+  useLinkClickHandler,
   useLocation,
+  useMatch,
   useNavigate,
   useParams,
   useRoute,
@@ -16,6 +27,7 @@ export type {
   BlockedResult,
   ErrorResult,
   HistoryState,
+  LinkRenderState,
   MetaTagsResolver,
   NavigateExternalOptions,
   NavigateOptions,
@@ -43,6 +55,7 @@ export type {
   ScrollBehaviorStrategy,
   StateCompareStrategy,
   TitleResolver,
+  To,
 } from './types';
 export {
   addBase,
@@ -58,6 +71,7 @@ export {
   getRouteScore,
   getWildcardParamName,
   handleResolveResult,
+  isModifiedEvent,
   isWildcardSegment,
   matchRoute,
   matchSegments,
@@ -75,6 +89,7 @@ export {
   scrollToFragment,
   scrollToTarget,
   stripBase,
+  toPath,
   validateParams,
   wrapHistoryState,
 } from './utils';
