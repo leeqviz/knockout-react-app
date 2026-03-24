@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import type {
   BlockerFunction,
   BlockerState,
@@ -13,14 +13,11 @@ export interface Blocker {
   reset: () => void;
 }
 
-type ShouldBlock<TMeta extends Record<string, unknown>> =
-  | boolean
-  | BlockerFunction<TMeta>;
-
 export function useBlocker<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
->(shouldBlock: ShouldBlock<TMeta>): Blocker {
+>(shouldBlock: boolean | BlockerFunction<TMeta>): Blocker {
   const router = useRouter<TMeta>();
+  const id = useId();
 
   const shouldBlockRef = useRef(shouldBlock);
   useEffect(() => {
@@ -28,12 +25,12 @@ export function useBlocker<
   });
 
   useEffect(() => {
-    router.setBlocker((to, from) => {
+    router.setBlocker(id, (to, from) => {
       const fn = shouldBlockRef.current;
       return typeof fn === 'function' ? fn(to, from) : fn;
     });
-    return () => router.setBlocker(null);
-  }, [router]);
+    return () => router.setBlocker(id, null);
+  }, [router, id]);
 
   return {
     state: router.blockerState,

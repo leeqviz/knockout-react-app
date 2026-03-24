@@ -180,7 +180,12 @@ export interface RouterSnapshot<
   navigationType: RouterNavigationType;
   blockerState: BlockerState;
   blockedTo: NavigationLocation | null;
-  setBlocker: (fn: BlockerFunction<TMeta> | null) => void;
+  setBlocker: (
+    id: string,
+    fn:
+      | ((to: NavigationLocation, from: RouteState<TMeta> | null) => boolean)
+      | null,
+  ) => void;
   proceedBlocked: () => void;
   resetBlocked: () => void;
 }

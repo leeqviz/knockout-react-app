@@ -82,9 +82,10 @@ export class BaseRouter<
   protected currentHistoryKey: string = '';
   protected previousRouteState: RouteState<TMeta> | null = null;
   protected isStarted: boolean = false;
-  protected blockerFn:
-    | ((to: NavigationLocation, from: RouteState<TMeta> | null) => boolean)
-    | null = null;
+  protected blockers = new Map<
+    string,
+    (to: NavigationLocation, from: RouteState<TMeta> | null) => boolean
+  >();
   protected pendingProceed: (() => void) | null = null;
 
   public currentComponent: KnockoutObservable<string>;
@@ -239,7 +240,7 @@ export class BaseRouter<
     this.blockerState('unblocked');
     this.blockedTo(null);
     this.pendingProceed = null;
-    this.blockerFn = null;
+    this.blockers.clear();
   };
 
   protected handleBeforeUnload = (event: BeforeUnloadEvent): void => {
@@ -299,14 +300,18 @@ export class BaseRouter<
       if (!this.confirmLeaveHook(to, this.captureCurrentRouteState())) return;
     }
 
-    if (this.blockerFn && this.blockerState() !== 'proceeding') {
+    if (this.blockers.size > 0 && this.blockerState() !== 'proceeding') {
       const to: NavigationLocation = {
         pathname: normalizePath(nextUrl.pathname),
         search: nextUrl.search,
         hash: nextHash,
         state: nextState,
       };
-      if (this.blockerFn(to, this.captureCurrentRouteState())) {
+      const from = this.captureCurrentRouteState();
+      const shouldBlock = [...this.blockers.values()].some((fn) =>
+        fn(to, from),
+      );
+      if (shouldBlock) {
         this.blockerState('blocked');
         this.blockedTo(to);
         this.pendingProceed = () => this.navigate(path, options);
@@ -512,14 +517,18 @@ export class BaseRouter<
       new URL(nextFullPath + nextHash, window.location.origin),
     );
 
-    if (this.blockerFn && this.blockerState() !== 'proceeding') {
+    if (this.blockers.size > 0 && this.blockerState() !== 'proceeding') {
       const to: NavigationLocation = {
         pathname: originalUrl.pathname,
         search: originalUrl.search,
         hash: nextHash,
         state: nextUserState,
       };
-      if (this.blockerFn(to, this.captureCurrentRouteState())) {
+      const from = this.captureCurrentRouteState();
+      const shouldBlock = [...this.blockers.values()].some((fn) =>
+        fn(to, from),
+      );
+      if (shouldBlock) {
         this.rollbackHistory(
           previousHistoryKey,
           previousState,
@@ -1161,15 +1170,20 @@ export class BaseRouter<
   };
 
   public setBlocker = (
+    id: string,
     fn:
       | ((to: NavigationLocation, from: RouteState<TMeta> | null) => boolean)
       | null,
   ): void => {
-    this.blockerFn = fn;
-    if (!fn) {
-      this.blockerState('unblocked');
-      this.blockedTo(null);
-      this.pendingProceed = null;
+    if (fn === null) {
+      this.blockers.delete(id);
+      if (this.blockers.size === 0) {
+        this.blockerState('unblocked');
+        this.blockedTo(null);
+        this.pendingProceed = null;
+      }
+    } else {
+      this.blockers.set(id, fn);
     }
   };
 
