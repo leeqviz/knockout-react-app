@@ -4,9 +4,11 @@ export { RouterContext } from './lib';
 export { BaseRouter } from './router';
 export type {
   AfterNavigateHook,
+  BeforeNavigateHook,
   BlockedResult,
   ErrorResult,
   HistoryState,
+  MetaTagsResolver,
   NavigateExternalOptions,
   NavigateOptions,
   NavigationBlockedHook,
@@ -32,6 +34,7 @@ export type {
   ScrollBehaviorOptions,
   ScrollBehaviorStrategy,
   StateCompareStrategy,
+  TitleResolver,
 } from './types';
 export {
   addBase,

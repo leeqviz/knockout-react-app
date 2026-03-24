@@ -1,6 +1,8 @@
 import { ko } from '@/shared/lib/ko';
 import type {
   AfterNavigateHook,
+  BeforeNavigateHook,
+  MetaTagsResolver,
   NavigateExternalOptions,
   NavigateOptions,
   NavigationBlockedHook,
@@ -18,6 +20,7 @@ import type {
   RouteState,
   ScrollBehaviorMeta,
   ScrollBehaviorOptions,
+  TitleResolver,
 } from './types';
 import {
   addBase,
@@ -58,6 +61,7 @@ export class BaseRouter<
     meta?: ScrollBehaviorMeta<TMeta> | undefined,
   ) => ScrollBehaviorOptions | null;
   protected readonly stateCompare: (a: unknown, b: unknown) => boolean;
+  protected readonly beforeNavigateHook: BeforeNavigateHook<TMeta> | undefined;
   protected readonly afterNavigateHook: AfterNavigateHook<TMeta> | undefined;
   protected readonly onNavigationBlockedHook:
     | NavigationBlockedHook<TMeta>
@@ -66,7 +70,12 @@ export class BaseRouter<
   protected readonly confirmLeaveHook:
     | ((to: NavigationLocation, from: RouteState<TMeta> | null) => boolean)
     | undefined;
+  protected readonly titleResolver: TitleResolver<TMeta> | undefined;
+  protected readonly metaTagsResolver: MetaTagsResolver<TMeta> | undefined;
+  protected readonly debug: boolean;
   protected readonly enableBeforeUnload: boolean;
+  protected readonly maxScrollEntries: number;
+  protected readonly maxRewriteDepth: number;
   protected scrollOptions = new Map<string, ScrollBehaviorOptions | null>();
   protected currentHistoryKey: string = '';
   protected previousRouteState: RouteState<TMeta> | null = null;
@@ -82,14 +91,21 @@ export class BaseRouter<
   public currentRouteName: KnockoutObservable<string | undefined>;
   public currentMeta: KnockoutObservable<TMeta | undefined>;
   public currentPattern: KnockoutObservable<string | undefined>;
+  public isNavigating: KnockoutObservable<boolean>;
 
   protected constructor(options?: RouterOptions<TMeta>) {
     this.routes = rankRoutes(options?.routes ?? []);
     this.base = normalizeBase(options?.base ?? '');
+    this.debug = options?.debug ?? false;
     this.caseSensitive = options?.caseSensitive ?? false;
+    this.maxScrollEntries = options?.maxScrollEntries ?? 50;
+    this.maxRewriteDepth = options?.maxRewriteDepth ?? 10;
     this.middlewares = options?.middlewares || [];
     this.scrollBehavior = options?.scrollBehavior ?? defaultScrollBehavior;
     this.stateCompare = resolveComparator(options?.stateCompare);
+    this.titleResolver = options?.titleResolver;
+    this.metaTagsResolver = options?.metaTagsResolver;
+    this.beforeNavigateHook = options?.beforeNavigate;
     this.afterNavigateHook = options?.afterNavigate;
     this.onNavigationBlockedHook = options?.onNavigationBlocked;
     this.onNavigationErrorHook = options?.onNavigationError;
@@ -106,6 +122,7 @@ export class BaseRouter<
       matchRoute(r.pattern, strippedPathname, this.caseSensitive),
     );
 
+    this.isNavigating = ko.observable(false);
     this.currentComponent = ko.observable(initialMatch?.component ?? '');
     this.currentRouteName = ko.observable(initialMatch?.name);
     this.currentMeta = ko.observable(initialMatch?.meta);
@@ -177,6 +194,12 @@ export class BaseRouter<
       },
       onResolved: (res) => {
         const nextState = { ...res.value, hash: initialHash };
+        this.notifyBeforeNavigate({
+          pathname: nextState.pathname,
+          search: nextState.search,
+          hash: nextState.hash,
+          state: userState,
+        });
         this.applyState(nextState);
         this.notifyAfterNavigate(nextState);
         this.handleScroll({
@@ -199,8 +222,19 @@ export class BaseRouter<
   };
 
   protected handleBeforeUnload = (event: BeforeUnloadEvent): void => {
-    event.preventDefault();
-    event.returnValue = '';
+    if (!this.confirmLeaveHook) return;
+
+    const externalTo: NavigationLocation = {
+      pathname: '',
+      search: '',
+      hash: '',
+      state: null,
+    };
+
+    if (!this.confirmLeaveHook(externalTo, this.captureCurrentRouteState())) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
   };
 
   public navigate = (
@@ -247,6 +281,12 @@ export class BaseRouter<
     if (samePath && sameState && !sameHash) {
       const fullUrlWithHash = addBase(currentFullPath, this.base) + nextHash;
 
+      this.notifyBeforeNavigate({
+        pathname: normalizePath(nextUrl.pathname),
+        search: nextUrl.search,
+        hash: nextHash,
+        state: options?.state ?? null,
+      });
       this.pushOrReplace(fullUrlWithHash, nextState, options?.replace);
 
       this.currentHash(nextHash);
@@ -291,12 +331,18 @@ export class BaseRouter<
         if (!handled) throw res.error;
       },
       onResolved: (res) => {
+        const nextRouteState = { ...res.value, hash: nextHash };
+        this.notifyBeforeNavigate({
+          pathname: nextRouteState.pathname,
+          search: nextRouteState.search,
+          hash: nextRouteState.hash,
+          state: nextState,
+        });
         const normalizedPath =
           addBase(res.value.pathname + res.value.search, this.base) + nextHash;
 
         this.pushOrReplace(normalizedPath, nextState, options?.replace);
 
-        const nextRouteState = { ...res.value, hash: nextHash };
         this.applyState(nextRouteState);
         this.notifyAfterNavigate(nextRouteState);
         this.handleScroll({
@@ -353,6 +399,7 @@ export class BaseRouter<
         state: this.currentHistoryState(),
       },
 
+      isNavigating: this.isNavigating(),
       isActive: this.isActive,
       isExact: this.isExact,
 
@@ -471,6 +518,12 @@ export class BaseRouter<
       },
       onResolved: (res) => {
         const nextRouteState = { ...res.value, hash: nextHash };
+        this.notifyBeforeNavigate({
+          pathname: nextRouteState.pathname,
+          search: nextRouteState.search,
+          hash: nextRouteState.hash,
+          state: nextUserState,
+        });
         this.applyState(nextRouteState);
         this.notifyAfterNavigate(nextRouteState);
         this.handleScroll({
@@ -503,8 +556,10 @@ export class BaseRouter<
     scrollOptions: ScrollBehaviorOptions | null = null,
     depth: number = 0,
   ): void => {
-    if (depth > 10)
-      throw new Error(`Maximum rewrite depth exceeded at "${rewriteTo}"`);
+    if (depth > this.maxRewriteDepth)
+      throw new Error(
+        `Maximum rewrite depth (${this.maxRewriteDepth}) exceeded at "${rewriteTo}"`,
+      );
 
     const result = this.resolvePath(rewriteTo, state);
 
@@ -551,6 +606,12 @@ export class BaseRouter<
           meta: res.value.meta,
           pattern: res.value.pattern,
         };
+        this.notifyBeforeNavigate({
+          pathname: nextRouteState.pathname,
+          search: nextRouteState.search,
+          hash: nextRouteState.hash,
+          state,
+        });
         this.applyState(nextRouteState);
         this.notifyAfterNavigate(nextRouteState);
         this.handleScroll({
@@ -654,12 +715,12 @@ export class BaseRouter<
   protected saveCurrentScrollPosition = (): void => {
     if (!this.currentHistoryKey) return;
     this.scrollOptions.set(this.currentHistoryKey, {
-      top: window.scrollX,
-      left: window.scrollY,
+      top: window.scrollY,
+      left: window.scrollX,
       behavior: 'smooth',
     });
 
-    if (this.scrollOptions.size > 50) {
+    if (this.scrollOptions.size > this.maxScrollEntries) {
       const firstKey = this.scrollOptions.keys().next().value;
       if (firstKey) this.scrollOptions.delete(firstKey);
     }
@@ -793,14 +854,29 @@ export class BaseRouter<
     hash?: string,
   ): string => {
     const route = this.routes.find((r) => r.name === name);
-
     if (!route) throw new Error(`Route "${name}" not found`);
+
+    if (route.paramValidators && params) {
+      if (!validateParams(params, route.paramValidators)) {
+        throw new Error(
+          `buildPath("${name}"): invalid params — ` +
+            `param validation failed for: ${Object.keys(route.paramValidators).join(', ')}`,
+        );
+      }
+    }
 
     return buildPathByRoute(route, params, searchParams, hash);
   };
 
+  protected notifyBeforeNavigate = (to: NavigationLocation): void => {
+    this.isNavigating(true);
+    this.beforeNavigateHook?.(to, this.captureCurrentRouteState());
+  };
+
   protected notifyAfterNavigate = (to: RouteState<TMeta>): void => {
+    this.applyDocumentMeta(to);
     this.afterNavigateHook?.(to, this.previousRouteState);
+    this.isNavigating(false);
   };
 
   protected notifyNavigationBlocked = (to: NavigationLocation): void => {
@@ -815,22 +891,58 @@ export class BaseRouter<
   };
 
   public isActive = (path: string): boolean => {
-    const normalized = sanitizePath(path);
-    const current = this.currentPathname();
-    if (this.caseSensitive)
-      return current === normalized || current.startsWith(normalized + '/');
+    const url = resolveTo(path, this.currentPathname(), this.currentSearch());
+    const target = parseUrl(url);
+    const targetPath = sanitizePath(target.pathname);
+    const currentPath = sanitizePath(this.currentPathname());
 
-    const n = normalized.toLowerCase();
-    const c = current.toLowerCase();
-    return c === n || c.startsWith(n + '/');
+    const compare = (a: string, b: string) =>
+      this.caseSensitive ? a === b : a.toLowerCase() === b.toLowerCase();
+
+    const pathnameMatch =
+      compare(currentPath, targetPath) ||
+      (this.caseSensitive
+        ? currentPath.startsWith(targetPath + '/')
+        : currentPath.toLowerCase().startsWith(targetPath.toLowerCase() + '/'));
+
+    if (!pathnameMatch) return false;
+
+    if (target.search) {
+      const targetParams = new URLSearchParams(target.search);
+      const currentParams = new URLSearchParams(this.currentSearch());
+      for (const [key, value] of targetParams) {
+        if (currentParams.get(key) !== value) return false;
+      }
+    }
+
+    if (target.hash) {
+      if (this.currentHash() !== target.hash) return false;
+    }
+
+    return true;
   };
 
   public isExact = (path: string): boolean => {
-    const normalized = sanitizePath(path);
-    const current = this.currentPathname();
-    return this.caseSensitive
-      ? current === normalized
-      : current.toLowerCase() === normalized.toLowerCase();
+    const url = resolveTo(path, this.currentPathname(), this.currentSearch());
+    const target = parseUrl(url);
+
+    const pathnameMatch = this.caseSensitive
+      ? sanitizePath(this.currentPathname()) === sanitizePath(target.pathname)
+      : sanitizePath(this.currentPathname()).toLowerCase() ===
+        sanitizePath(target.pathname).toLowerCase();
+
+    if (!pathnameMatch) return false;
+
+    const a = new URLSearchParams(this.currentSearch());
+    const b = new URLSearchParams(target.search);
+    if ([...a].length !== [...b].length) return false;
+    for (const [key, value] of b) {
+      if (a.get(key) !== value) return false;
+    }
+
+    if (this.currentHash() !== target.hash) return false;
+
+    return true;
   };
 
   public back = (): void => {
@@ -851,7 +963,7 @@ export class BaseRouter<
 
   public resolveRoute = (
     path: string,
-    options?: { runMiddlewares?: boolean },
+    options?: { skipMiddlewares?: boolean },
   ): ResolvedRoute<TMeta> | null => {
     let url: URL;
     try {
@@ -862,7 +974,7 @@ export class BaseRouter<
 
     const { pathname, searchParams } = parseUrl(url);
 
-    if (options?.runMiddlewares) {
+    if (!options?.skipMiddlewares) {
       const globalResult = runMiddlewares(this.middlewares, {
         pathname,
         search: url.search,
@@ -886,7 +998,7 @@ export class BaseRouter<
       );
       if (!queryResult.valid) continue;
 
-      if (options?.runMiddlewares && route.middlewares?.length) {
+      if (!options?.skipMiddlewares && route.middlewares?.length) {
         const routeResult = runMiddlewares(route.middlewares, {
           pathname,
           search: url.search,
@@ -936,8 +1048,41 @@ export class BaseRouter<
 
   public createHref = (path: string): string => {
     const url = resolveTo(path, this.currentPathname(), this.currentSearch());
+    const { pathname } = parseUrl(url);
+
+    const matched = this.routes.some((r) =>
+      matchRoute(r.pattern, pathname, this.caseSensitive),
+    );
+    if (!matched) {
+      throw new Error(`createHref: no route matches "${pathname}".`);
+    }
+
     return (
       addBase(normalizePath(url.pathname), this.base) + url.search + url.hash
     );
+  };
+
+  protected applyDocumentMeta = (state: RouteState<TMeta>): void => {
+    const resolvedTitle = this.titleResolver?.(state);
+    if (resolvedTitle !== undefined) {
+      document.title = resolvedTitle;
+    } else if (state.name) {
+      const route = this.routes.find((r) => r.name === state.name);
+      if (route?.title) document.title = route.title;
+    }
+
+    const tags = this.metaTagsResolver?.(state);
+    if (!tags) return;
+    for (const [name, content] of Object.entries(tags)) {
+      let el = document.querySelector<HTMLMetaElement>(
+        `meta[name="${CSS.escape(name)}"]`,
+      );
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('name', name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    }
   };
 }

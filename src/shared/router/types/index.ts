@@ -19,6 +19,8 @@ export type {
 } from './route';
 export type {
   AfterNavigateHook,
+  BeforeNavigateHook,
+  MetaTagsResolver,
   NavigateExternalOptions,
   NavigateOptions,
   NavigationBlockedHook,
@@ -32,4 +34,5 @@ export type {
   ScrollBehaviorOptions,
   ScrollBehaviorStrategy,
   StateCompareStrategy,
+  TitleResolver,
 } from './router';

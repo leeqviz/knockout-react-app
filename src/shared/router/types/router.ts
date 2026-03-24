@@ -31,12 +31,24 @@ export type ScrollBehaviorStrategy<
   meta?: ScrollBehaviorMeta<TMeta> | undefined,
 ) => ScrollBehaviorOptions | null;
 
+export type TitleResolver<
+  TMeta extends Record<string, unknown> = Record<string, unknown>,
+> = (state: RouteState<TMeta>) => string | undefined;
+
+export type MetaTagsResolver<
+  TMeta extends Record<string, unknown> = Record<string, unknown>,
+> = (state: RouteState<TMeta>) => Record<string, string> | undefined;
+
 export interface NavigationLocation {
   pathname: string;
   search: string;
   hash: string;
   state: unknown;
 }
+
+export type BeforeNavigateHook<
+  TMeta extends Record<string, unknown> = Record<string, unknown>,
+> = (to: NavigationLocation, from: RouteState<TMeta> | null) => void;
 
 export type AfterNavigateHook<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
@@ -58,6 +70,9 @@ export interface RouterOptions<
   middlewares?: RouteMiddleware<TMeta>[] | undefined;
   scrollBehavior?: ScrollBehaviorStrategy<TMeta>;
   stateCompare?: StateCompareStrategy;
+  titleResolver?: TitleResolver<TMeta>;
+  metaTagsResolver?: MetaTagsResolver<TMeta>;
+  beforeNavigate?: BeforeNavigateHook<TMeta>;
   afterNavigate?: AfterNavigateHook<TMeta>;
   onNavigationBlocked?: NavigationBlockedHook<TMeta>;
   onNavigationError?: NavigationErrorHook;
@@ -69,6 +84,9 @@ export interface RouterOptions<
     from: RouteState<TMeta> | null,
   ) => boolean;
   enableBeforeUnload?: boolean;
+
+  maxScrollEntries?: number; // default: 50
+  maxRewriteDepth?: number; // default: 10
 }
 
 export interface NavigateOptions {
@@ -142,6 +160,7 @@ export interface RouterSnapshot<
   getAllSearchParams: (key: string) => string[];
   hasSearchParam: (key: string) => boolean;
 
+  isNavigating: boolean;
   params: RouteParams;
   searchParams: RouteSearchParams;
   route: {

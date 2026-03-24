@@ -16,6 +16,7 @@ export interface RouteConfig<
   middlewares?: RouteMiddleware<TMeta>[] | undefined;
   paramValidators?: Record<string, RegExp | string[]>;
   queryParams?: Record<string, QueryParamConfig>;
+  title?: string;
 }
 
 export type RouteParams = Record<string, string>;
