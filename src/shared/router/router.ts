@@ -98,6 +98,7 @@ export class BaseRouter<
   public currentMeta: KnockoutObservable<TMeta | undefined>;
   public currentPattern: KnockoutObservable<string | undefined>;
   public isNavigating: KnockoutObservable<boolean>;
+  public pendingLocation: KnockoutObservable<NavigationLocation | null>;
   public currentNavigationType: KnockoutObservable<RouterNavigationType>;
   public blockerState: KnockoutObservable<BlockerState>;
   public blockedTo: KnockoutObservable<NavigationLocation | null>;
@@ -132,6 +133,7 @@ export class BaseRouter<
     );
 
     this.isNavigating = ko.observable(false);
+    this.pendingLocation = ko.observable(null);
     this.currentComponent = ko.observable(initialMatch?.component ?? '');
     this.currentRouteName = ko.observable(initialMatch?.name);
     this.currentMeta = ko.observable(initialMatch?.meta);
@@ -231,6 +233,13 @@ export class BaseRouter<
     window.removeEventListener('popstate', this.handlePopState);
     if (this.enableBeforeUnload)
       window.removeEventListener('beforeunload', this.handleBeforeUnload);
+
+    this.isNavigating(false);
+    this.pendingLocation(null);
+    this.blockerState('unblocked');
+    this.blockedTo(null);
+    this.pendingProceed = null;
+    this.blockerFn = null;
   };
 
   protected handleBeforeUnload = (event: BeforeUnloadEvent): void => {
@@ -428,6 +437,7 @@ export class BaseRouter<
         state: this.currentHistoryState(),
       },
 
+      pendingLocation: this.pendingLocation(),
       isNavigating: this.isNavigating(),
       navigationType: this.currentNavigationType(),
       blockerState: this.blockerState(),
@@ -932,6 +942,7 @@ export class BaseRouter<
 
   protected notifyBeforeNavigate = (to: NavigationLocation): void => {
     this.isNavigating(true);
+    this.pendingLocation(to);
     this.beforeNavigateHook?.(to, this.captureCurrentRouteState());
   };
 
@@ -939,6 +950,7 @@ export class BaseRouter<
     this.applyDocumentMeta(to);
     this.afterNavigateHook?.(to, this.previousRouteState);
     this.isNavigating(false);
+    this.pendingLocation(null);
   };
 
   protected notifyNavigationBlocked = (to: NavigationLocation): void => {

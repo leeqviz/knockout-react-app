@@ -4,3 +4,4 @@ export { Navigate } from './navigate';
 export { Prompt } from './prompt';
 export { RouterProvider, type RouterProviderProps } from './router-provider';
 export { ScrollRestoration } from './scroll-restoration';
+export { SmartLink } from './smart-link';

@@ -176,7 +176,7 @@ export interface RouterSnapshot<
     pattern?: string | undefined;
   };
   location: NavigationLocation;
-
+  pendingLocation: NavigationLocation | null;
   navigationType: RouterNavigationType;
   blockerState: BlockerState;
   blockedTo: NavigationLocation | null;

@@ -5,6 +5,7 @@ export {
   Prompt,
   RouterProvider,
   ScrollRestoration,
+  SmartLink,
   type LinkProps,
   type RouterProviderProps,
 } from './components';
@@ -16,6 +17,7 @@ export {
   useLocation,
   useMatch,
   useNavigate,
+  useNavigation,
   useNavigationType,
   useParams,
   usePrompt,

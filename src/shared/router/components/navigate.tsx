@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { useNavigate } from '../hooks';
 import type { To } from '../types';
 import { toPath } from '../utils';
@@ -14,7 +14,7 @@ export function Navigate({
 }) {
   const { navigate } = useNavigate();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigate(toPath(to), { replace, state: state ?? null });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

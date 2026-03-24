@@ -5,6 +5,7 @@ export { useLinkClickHandler } from './use-link-click-handler';
 export { useLocation } from './use-location';
 export { useMatch } from './use-match';
 export { useNavigate } from './use-navigate';
+export { useNavigation } from './use-navigation';
 export { useNavigationType } from './use-navigation-type';
 export { useParams } from './use-params';
 export { usePrompt } from './use-prompt';

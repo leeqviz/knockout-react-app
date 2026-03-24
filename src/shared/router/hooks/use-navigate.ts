@@ -1,24 +1,12 @@
 import { useRouter } from './use-router';
 
 export function useNavigate() {
-  const {
-    navigate,
-    navigateExternal,
-    back,
-    forward,
-    go,
-    isNavigating,
-    isActive,
-    isExact,
-  } = useRouter();
+  const { navigate, navigateExternal, back, forward, go } = useRouter();
   return {
     navigate,
     navigateExternal,
     back,
     forward,
     go,
-    isNavigating,
-    isActive,
-    isExact,
   };
 }

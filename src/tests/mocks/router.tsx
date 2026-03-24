@@ -23,6 +23,7 @@ export const mockedRouterContextValue: RouterSnapshot = {
     hash: '',
     state: null,
   },
+  pendingLocation: null,
   isActive: vi.fn(),
   isExact: vi.fn(),
   setSearchParam: vi.fn(),
