@@ -1,5 +1,13 @@
 export { RouterLink, RouterProvider } from './components';
-export { useRouter } from './hooks';
+export {
+  useLocation,
+  useNavigate,
+  useParams,
+  useRoute,
+  useRouter,
+  useRouterUtils,
+  useSearchParams,
+} from './hooks';
 export { RouterContext } from './lib';
 export { BaseRouter } from './router';
 export type {
