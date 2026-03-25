@@ -1,4 +1,4 @@
-import ko from 'knockout';
+import { ko } from '@/shared/lib/ko';
 
 export class BaseEventBus<TEventPayloadMap extends Record<string, unknown>> {
   protected dispatcher: KnockoutSubscribable<unknown>;

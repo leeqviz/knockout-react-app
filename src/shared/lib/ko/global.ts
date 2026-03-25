@@ -1,3 +1,4 @@
+import knockout from 'knockout';
 import type {
   KnockoutObservableArrayWithDispose,
   KnockoutObservableWithDispose,
@@ -5,6 +6,9 @@ import type {
 } from './types';
 
 declare global {
+  interface Window {
+    ko: KnockoutStatic; //typeof import('knockout');
+  }
   interface KnockoutExtenders {
     [name: string]: unknown;
     localStorageSync<T>(
@@ -65,3 +69,8 @@ declare global {
     }
   }
 }
+
+/**
+ * Include Knockout in the environment if it was provided via script tag and comes out from public folder
+ */
+export const ko = (window.ko = knockout);

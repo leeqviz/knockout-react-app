@@ -3,7 +3,7 @@ import {
   navigateBindingHandler,
   reactBindingHandler,
 } from '@/app/bindings';
-import ko from 'knockout';
+import { ko } from '@/shared/lib/ko';
 
 const bindingHandlers = {
   link: linkBindingHandler,

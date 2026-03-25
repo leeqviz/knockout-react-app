@@ -1,5 +1,5 @@
 import { lazyComponentLoader } from '@/app/loaders';
-import ko from 'knockout';
+import { ko } from '@/shared/lib/ko';
 
 const loaders = [lazyComponentLoader]; // order is important
 

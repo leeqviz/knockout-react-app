@@ -6,7 +6,7 @@ import {
   notFoundComponentMeta,
   notFoundLazyComponentMeta,
 } from '@/app/components';
-import ko from 'knockout';
+import { ko } from '@/shared/lib/ko';
 
 const components = [
   mainComponentMeta,
