@@ -152,7 +152,7 @@ export interface RouterSnapshot<
   forward: () => void;
   go: (delta: number) => void;
 
-  buildPath: (
+  generatePath: (
     name: string,
     params?: RouteParams,
     search?: RouteSearchParams | URLSearchParams,

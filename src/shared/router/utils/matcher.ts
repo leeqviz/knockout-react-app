@@ -175,7 +175,7 @@ export function rankRoutes<
     .map((item) => item.route);
 }
 
-export function buildPathByRoute<
+export function buildPath<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 >(
   route: RouteConfig<TMeta>,

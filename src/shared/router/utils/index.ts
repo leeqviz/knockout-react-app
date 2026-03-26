@@ -12,7 +12,7 @@ export {
 } from './history';
 export {
   applyQueryParamConfig,
-  buildPathByRoute,
+  buildPath,
   getRouteScore,
   getWildcardParamName,
   isWildcardSegment,

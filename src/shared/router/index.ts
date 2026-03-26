@@ -72,7 +72,7 @@ export {
   addBase,
   AllowedURLProtocols,
   applyQueryParamConfig,
-  buildPathByRoute,
+  buildPath,
   compareDeep,
   compareReference,
   compareShallow,

@@ -1,7 +1,20 @@
 import { useRouter } from './use-router';
 
 export function useRouterUtils() {
-  const { buildPath, createHref, resolveRoute, hasRoute, isActive, isExact } =
-    useRouter();
-  return { buildPath, createHref, resolveRoute, hasRoute, isActive, isExact };
+  const {
+    generatePath,
+    createHref,
+    resolveRoute,
+    hasRoute,
+    isActive,
+    isExact,
+  } = useRouter();
+  return {
+    generatePath,
+    createHref,
+    resolveRoute,
+    hasRoute,
+    isActive,
+    isExact,
+  };
 }

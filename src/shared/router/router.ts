@@ -28,7 +28,7 @@ import {
   addBase,
   AllowedURLProtocols,
   applyQueryParamConfig,
-  buildPathByRoute,
+  buildPath,
   defaultScrollBehavior,
   generateHistoryStateKey,
   getFullPath,
@@ -420,7 +420,7 @@ export class BaseRouter<
     return {
       navigate: this.navigate,
       navigateExternal: this.navigateExternal,
-      buildPath: this.buildPath,
+      generatePath: this.generatePath,
       createHref: this.createHref,
       back: this.back,
       forward: this.forward,
@@ -928,7 +928,7 @@ export class BaseRouter<
     });
   };
 
-  public buildPath = (
+  public generatePath = (
     name: string,
     params?: RouteParams,
     searchParams?: RouteSearchParams | URLSearchParams,
@@ -940,13 +940,13 @@ export class BaseRouter<
     if (route.paramValidators && params) {
       if (!validateParams(params, route.paramValidators)) {
         throw new Error(
-          `buildPath("${name}"): invalid params — ` +
+          `generatePath("${name}"): invalid params — ` +
             `param validation failed for: ${Object.keys(route.paramValidators).join(', ')}`,
         );
       }
     }
 
-    return buildPathByRoute(route, params, searchParams, hash);
+    return buildPath(route, params, searchParams, hash);
   };
 
   protected notifyBeforeNavigate = (to: NavigationLocation): void => {

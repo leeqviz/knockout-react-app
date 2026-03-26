@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 
 export const mockedRouterContextValue: RouterSnapshot = {
   navigate: vi.fn(),
-  buildPath: vi.fn(),
+  generatePath: vi.fn(),
   back: vi.fn(),
   forward: vi.fn(),
   go: vi.fn(),
