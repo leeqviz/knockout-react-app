@@ -10,6 +10,7 @@ const bindingHandlers = {
   navigate: navigateBindingHandler,
   reactMain: reactBindingHandler,
   reactDatepicker: reactBindingHandler,
+  reactHeader: reactBindingHandler,
 };
 
 export function setupBindings() {
