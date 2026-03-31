@@ -9,6 +9,7 @@ import type {
   NavigationBlockedHook,
   NavigationErrorHook,
   NavigationLocation,
+  NavigationNotFoundHook,
   ParsedURL,
   ResolvedRoute,
   RouteConfig,
@@ -78,6 +79,10 @@ export class BaseRouter<
   protected readonly enableBeforeUnload: boolean;
   protected readonly maxScrollEntries: number;
   protected readonly maxRewriteDepth: number;
+  protected readonly fallback: string | undefined;
+  protected readonly onNavigationNotFoundHook:
+    | NavigationNotFoundHook
+    | undefined;
   protected scrollOptions = new Map<string, ScrollBehaviorOptions | null>();
   protected currentHistoryKey: string = '';
   protected previousRouteState: RouteState<TMeta> | null = null;
@@ -103,6 +108,7 @@ export class BaseRouter<
   public currentNavigationType: KnockoutObservable<RouterNavigationType>;
   public blockerState: KnockoutObservable<BlockerState>;
   public blockedTo: KnockoutObservable<NavigationLocation | null>;
+  public snapshot: KnockoutComputed<RouterSnapshot<TMeta>>;
 
   protected constructor(options?: RouterOptions<TMeta>) {
     this.routes = rankRoutes(options?.routes ?? []);
@@ -124,21 +130,31 @@ export class BaseRouter<
     this.enableBeforeUnload = options?.confirmLeave
       ? (options?.enableBeforeUnload ?? true)
       : false;
+    this.fallback = options?.fallback;
+    this.onNavigationNotFoundHook = options?.onNavigationNotFound;
 
     const initialUrl = new URL(window.location.href);
     const strippedPathname = normalizePath(
       stripBase(initialUrl.pathname, this.base),
     );
-    const initialMatch = this.routes.find((r) =>
-      matchRoute(r.pattern, strippedPathname, this.caseSensitive),
-    );
+    let initialParams: RouteParams = {};
+    const initialMatch = this.routes.find((r) => {
+      const match = matchRoute(r.pattern, strippedPathname, this.caseSensitive);
+      if (match) {
+        initialParams = match;
+        return true;
+      }
+      return false;
+    });
 
     this.isNavigating = ko.observable(false);
     this.pendingLocation = ko.observable(null);
-    this.currentComponent = ko.observable(initialMatch?.component ?? '');
+    this.currentComponent = ko.observable(
+      initialMatch?.component ?? this.fallback ?? '',
+    );
     this.currentRouteName = ko.observable(initialMatch?.name);
     this.currentMeta = ko.observable(initialMatch?.meta);
-    this.currentParams = ko.observable({});
+    this.currentParams = ko.observable(initialParams);
     this.currentPattern = ko.observable(initialMatch?.pattern);
     this.currentPathname = ko.observable(strippedPathname);
     this.currentSearch = ko.observable(initialUrl.search);
@@ -150,6 +166,7 @@ export class BaseRouter<
     this.currentNavigationType = ko.observable<RouterNavigationType>('pop');
     this.blockerState = ko.observable<BlockerState>('unblocked');
     this.blockedTo = ko.observable(null);
+    this.snapshot = ko.pureComputed(() => this.getSnapshot());
   }
 
   public start = (): void => {
@@ -223,6 +240,21 @@ export class BaseRouter<
           options: null,
         });
       },
+      onNotFound: () => {
+        this.notifyNavigationNotFound({
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: originalUrl.hash,
+          state: userState,
+        });
+        const s = this.buildNotFoundState(
+          originalUrl.pathname,
+          originalUrl.search,
+          initialHash,
+          userState,
+        );
+        if (s) this.applyState(s);
+      },
     });
   };
 
@@ -241,6 +273,7 @@ export class BaseRouter<
     this.blockedTo(null);
     this.pendingProceed = null;
     this.blockers.clear();
+    this.snapshot.dispose();
   };
 
   protected handleBeforeUnload = (event: BeforeUnloadEvent): void => {
@@ -392,6 +425,37 @@ export class BaseRouter<
           options: null,
         });
       },
+      onNotFound: () => {
+        const to: NavigationLocation = {
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: nextHash,
+          state: nextState,
+        };
+        this.notifyNavigationNotFound(to);
+        const s = this.buildNotFoundState(
+          originalUrl.pathname,
+          originalUrl.search,
+          nextHash,
+          nextState,
+        );
+        if (s) {
+          this.notifyBeforeNavigate(to);
+          this.pushOrReplace(
+            addBase(originalUrl.pathname + originalUrl.search, this.base) +
+              nextHash,
+            nextState,
+            options?.replace,
+          );
+          this.applyState(s);
+          this.notifyAfterNavigate(s);
+          this.handleScroll({
+            to: s,
+            from: this.previousRouteState,
+            options: null,
+          });
+        }
+      },
     });
   };
 
@@ -506,6 +570,7 @@ export class BaseRouter<
     }
 
     if (samePath) {
+      this.currentNavigationType('pop');
       this.currentHash(nextHash);
       this.currentHistoryState(nextUserState);
       this.notifyAfterNavigate(this.captureCurrentRouteState());
@@ -537,6 +602,7 @@ export class BaseRouter<
         );
         this.blockerState('blocked');
         this.blockedTo(to);
+        this.notifyNavigationBlocked(to);
         this.pendingProceed = () =>
           this.navigate(to.pathname + to.search + to.hash, {
             state: nextUserState,
@@ -612,6 +678,40 @@ export class BaseRouter<
           from: this.previousRouteState,
           options: savedScrollOption,
         });
+      },
+      onNotFound: () => {
+        const to: NavigationLocation = {
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: nextHash,
+          state: nextUserState,
+        };
+        this.notifyNavigationNotFound(to);
+        const s = this.buildNotFoundState(
+          originalUrl.pathname,
+          originalUrl.search,
+          nextHash,
+          nextUserState,
+        );
+        if (s) {
+          this.currentNavigationType('pop');
+          this.notifyBeforeNavigate(to);
+          this.applyState(s);
+          this.notifyAfterNavigate(s);
+          this.handleScroll({
+            to: s,
+            from: this.previousRouteState,
+            options: savedScrollOption,
+          });
+        } else {
+          // notFoundComponent не задан — откатываемся, чтобы не потерять UI
+          this.rollbackHistory(
+            previousHistoryKey,
+            previousState,
+            previousFullPath,
+            previousHash,
+          );
+        }
       },
     });
   };
@@ -701,6 +801,18 @@ export class BaseRouter<
           options: scrollOptions,
         });
       },
+      onNotFound: () => {
+        const error = new Error(
+          `resolveRewrite: no route matches "${rewriteTo}"`,
+        );
+        const handled = this.notifyNavigationError(error, {
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: originalUrl.hash,
+          state,
+        });
+        if (!handled) throw error;
+      },
     });
   };
 
@@ -763,19 +875,7 @@ export class BaseRouter<
     }
 
     return {
-      type: ResolveResultType.Resolved,
-      value: {
-        pathname,
-        search,
-        hash,
-        component: '',
-        params: {},
-        searchParams,
-        state,
-        name: undefined,
-        meta: undefined,
-        pattern: undefined,
-      },
+      type: ResolveResultType.NotFound,
     };
   };
 
@@ -798,7 +898,7 @@ export class BaseRouter<
     this.scrollOptions.set(this.currentHistoryKey, {
       top: window.scrollY,
       left: window.scrollX,
-      behavior: 'smooth',
+      behavior: 'auto',
     });
 
     if (this.scrollOptions.size > this.maxScrollEntries) {
@@ -919,7 +1019,9 @@ export class BaseRouter<
 
     Object.entries(params).forEach(([key, value]) => {
       if (Array.isArray(value)) value.forEach((v) => search.append(key, v));
-      else search.set(key, value);
+      else {
+        if (value !== null && value !== undefined) search.set(key, value);
+      }
     });
 
     this.navigate(this.buildUrlWithSearch(search), {
@@ -971,6 +1073,31 @@ export class BaseRouter<
     to: NavigationLocation,
   ): boolean => {
     return this.onNavigationErrorHook?.(error, to) === true;
+  };
+
+  protected notifyNavigationNotFound = (to: NavigationLocation): void => {
+    this.onNavigationNotFoundHook?.(to);
+  };
+
+  protected buildNotFoundState = (
+    pathname: string,
+    search: string,
+    hash: string,
+    state: unknown,
+  ): RouteState<TMeta> | null => {
+    if (!this.fallback) return null;
+    return {
+      pathname,
+      search,
+      hash,
+      component: this.fallback,
+      params: {},
+      searchParams: {},
+      state,
+      name: undefined,
+      meta: undefined,
+      pattern: undefined,
+    };
   };
 
   public isActive = (path: string): boolean => {
@@ -1198,7 +1325,7 @@ export class BaseRouter<
     this.pendingProceed = null;
     this.blockedTo(null);
     proceed();
-    this.blockerState('unblocked');
+    if (this.blockerState() === 'proceeding') this.blockerState('unblocked');
   };
 
   public resetBlocked = (): void => {

@@ -7,6 +7,7 @@ export type {
 export type {
   BlockedResult,
   ErrorResult,
+  NotFoundResult,
   QueryParamConfig,
   RedirectResult,
   ResolvedResult,
@@ -29,6 +30,7 @@ export type {
   NavigationBlockedHook,
   NavigationErrorHook,
   NavigationLocation,
+  NavigationNotFoundHook,
   ParsedURL,
   ResolvedRoute,
   RouterNavigationType,

@@ -2,5 +2,6 @@ export {
   datepickerComponentMeta,
   datepickerLazyComponentMeta,
 } from './datepicker';
+export { headerComponentMeta, headerLazyComponentMeta } from './header';
 export { mainComponentMeta, mainLazyComponentMeta } from './main';
-export { notFoundComponentMeta, notFoundLazyComponentMeta } from './not-found';
+export { notFoundComponentMeta } from './not-found';

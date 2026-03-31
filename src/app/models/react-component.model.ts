@@ -31,7 +31,7 @@ export abstract class ReactComponentWithRouterViewModel<
   public constructor(params: ReactComponentWithRouterViewModelParams) {
     super();
     this.props = {
-      router: params.withRouter ? appRouter.getSnapshot() : null,
+      router: params.withRouter ? appRouter.snapshot() : null,
       ...params.props,
     } as T;
   }

@@ -4,13 +4,9 @@ import {
   mainComponentMeta,
   mainLazyComponentMeta,
   notFoundComponentMeta,
-  notFoundLazyComponentMeta,
 } from '@/app/components';
 import { ko } from '@/shared/lib/ko';
-import {
-  headerComponentMeta,
-  headerLazyComponentMeta,
-} from '../components/header';
+import { headerComponentMeta, headerLazyComponentMeta } from '../components';
 
 const components = [
   mainComponentMeta,
@@ -18,7 +14,6 @@ const components = [
   datepickerComponentMeta,
   datepickerLazyComponentMeta,
   notFoundComponentMeta,
-  notFoundLazyComponentMeta,
   headerComponentMeta,
   headerLazyComponentMeta,
 ];

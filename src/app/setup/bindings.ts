@@ -11,6 +11,7 @@ const bindingHandlers = {
   reactMain: reactBindingHandler,
   reactDatepicker: reactBindingHandler,
   reactHeader: reactBindingHandler,
+  reactNotFound: reactBindingHandler,
 };
 
 export function setupBindings() {

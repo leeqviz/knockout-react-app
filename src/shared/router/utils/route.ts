@@ -4,4 +4,5 @@ export const ResolveResultType = {
   Rewrite: 'rewrite',
   Resolved: 'resolved',
   Error: 'error',
+  NotFound: 'not-found',
 } as const;

@@ -1,6 +1,7 @@
 import type {
   BlockedResult,
   ErrorResult,
+  NotFoundResult,
   RedirectResult,
   ResolvedResult,
   RewriteResult,
@@ -33,6 +34,7 @@ export function handleResolveResult<
     onRedirect: (result: RedirectResult) => void;
     onRewrite: (result: RewriteResult) => void;
     onResolved: (result: ResolvedResult<TMeta>) => void;
+    onNotFound: (result: NotFoundResult) => void;
   },
 ): void {
   switch (result.type) {
@@ -54,6 +56,10 @@ export function handleResolveResult<
     }
     case ResolveResultType.Resolved: {
       options.onResolved(result);
+      return;
+    }
+    case ResolveResultType.NotFound: {
+      options.onNotFound(result);
       return;
     }
     default: {

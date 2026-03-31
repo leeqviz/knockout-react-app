@@ -70,6 +70,8 @@ export type NavigationErrorHook = (
   to: NavigationLocation,
 ) => boolean | void;
 
+export type NavigationNotFoundHook = (to: NavigationLocation) => void;
+
 export interface RouterOptions<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 > {
@@ -83,6 +85,8 @@ export interface RouterOptions<
   afterNavigate?: AfterNavigateHook<TMeta>;
   onNavigationBlocked?: NavigationBlockedHook<TMeta>;
   onNavigationError?: NavigationErrorHook;
+  onNavigationNotFound?: NavigationNotFoundHook;
+  fallback?: string;
   debug?: boolean;
   base?: string;
   caseSensitive?: boolean;

@@ -67,6 +67,10 @@ export type ResolvedResult<
   value: RouteState<TMeta>;
 };
 
+export type NotFoundResult = {
+  type: typeof ResolveResultType.NotFound;
+};
+
 export type RouteResolutionResult<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 > =
@@ -74,4 +78,5 @@ export type RouteResolutionResult<
   | RedirectResult
   | RewriteResult
   | ErrorResult
+  | NotFoundResult
   | ResolvedResult<TMeta>;
