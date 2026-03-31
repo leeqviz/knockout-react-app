@@ -12,12 +12,15 @@ export function RouteGuard({
   redirect = '/login',
   fallback = null,
 }: RouteGuardProps) {
-  const { resolveRoute, navigate, location } = useRouter();
-  const canAccess = resolveRoute(location.pathname) !== null;
+  const { routeAPI, locationAPI, location } = useRouter();
+  const canAccess = routeAPI.resolveRoute(location.pathname) !== null;
 
   useEffect(() => {
     if (!canAccess)
-      navigate(redirect, { replace: true, state: { from: location.pathname } });
+      locationAPI.navigate(redirect, {
+        replace: true,
+        state: { from: location.pathname },
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canAccess]);
 

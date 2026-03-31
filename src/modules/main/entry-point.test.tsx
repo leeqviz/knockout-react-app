@@ -35,6 +35,8 @@ describe('MainEntryPoint', () => {
     const routerContextValue = renderWithRouterContext(<MainContainer />, {});
     const button = screen.getByRole('button', { name: 'Go to test' });
     button.click();
-    expect(routerContextValue.navigate).toHaveBeenCalledWith('/test');
+    expect(routerContextValue.locationAPI.navigate).toHaveBeenCalledWith(
+      '/test',
+    );
   });
 });

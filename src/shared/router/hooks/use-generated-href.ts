@@ -8,7 +8,7 @@ export function useGeneratedHref(
   searchParams?: RouteSearchParams,
   hash?: string,
 ): string {
-  const { generatePath } = useRouter();
+  const { generatePath } = useRouter().routeAPI;
   return useMemo(
     () => generatePath(name, params, searchParams, hash),
     [generatePath, name, params, searchParams, hash],

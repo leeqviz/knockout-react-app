@@ -25,7 +25,9 @@ export function MainContainer() {
       <div className="bg-red-300 h-0.5" />
       <UsersList />
       <Link to="/test">Go to test</Link>
-      <button onClick={() => router.navigate('/test')}>Go to test</button>
+      <button onClick={() => router.locationAPI.navigate('/test')}>
+        Go to test
+      </button>
     </DefaultContainer>
   );
 }

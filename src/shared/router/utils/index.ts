@@ -25,6 +25,7 @@ export { handleResolveResult, runMiddlewares } from './middleware';
 export {
   addBase,
   getFullPath,
+  mapLocation,
   normalizeBase,
   normalizeFullPath,
   normalizePath,

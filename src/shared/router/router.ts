@@ -56,10 +56,10 @@ import {
 export class BaseRouter<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 > {
-  public readonly routes: RouteConfig<TMeta>[];
   protected readonly base: string;
-  protected readonly caseSensitive: boolean;
+  protected readonly routes: RouteConfig<TMeta>[];
   protected readonly middlewares: RouteMiddleware<TMeta>[];
+
   protected readonly scrollBehavior: (
     meta?: ScrollBehaviorMeta<TMeta> | undefined,
   ) => ScrollBehaviorOptions | null;
@@ -70,19 +70,22 @@ export class BaseRouter<
     | NavigationBlockedHook<TMeta>
     | undefined;
   protected readonly onNavigationErrorHook: NavigationErrorHook | undefined;
+  protected readonly onNavigationNotFoundHook:
+    | NavigationNotFoundHook
+    | undefined;
   protected readonly confirmLeaveHook:
     | ((to: NavigationLocation, from: RouteState<TMeta> | null) => boolean)
     | undefined;
   protected readonly titleResolver: TitleResolver<TMeta> | undefined;
   protected readonly metaTagsResolver: MetaTagsResolver<TMeta> | undefined;
+
+  protected readonly caseSensitive: boolean;
   protected readonly debug: boolean;
   protected readonly enableBeforeUnload: boolean;
   protected readonly maxScrollEntries: number;
   protected readonly maxRewriteDepth: number;
-  protected readonly fallback: string | undefined;
-  protected readonly onNavigationNotFoundHook:
-    | NavigationNotFoundHook
-    | undefined;
+  protected readonly fallback: string;
+
   protected scrollOptions = new Map<string, ScrollBehaviorOptions | null>();
   protected currentHistoryKey: string = '';
   protected previousRouteState: RouteState<TMeta> | null = null;
@@ -131,7 +134,7 @@ export class BaseRouter<
     this.enableBeforeUnload = options?.confirmLeave
       ? (options?.enableBeforeUnload ?? true)
       : false;
-    this.fallback = options?.fallback;
+    this.fallback = options?.fallback ?? '';
     this.onNavigationNotFoundHook = options?.onNavigationNotFound;
 
     const initialUrl = new URL(window.location.href);
@@ -151,7 +154,7 @@ export class BaseRouter<
     this.isNavigating = ko.observable(false);
     this.pendingLocation = ko.observable(null);
     this.currentComponent = ko.observable(
-      initialMatch?.component ?? this.fallback ?? '',
+      initialMatch?.component ?? this.fallback,
     );
     this.currentRouteName = ko.observable(initialMatch?.name);
     this.currentMeta = ko.observable(initialMatch?.meta);
@@ -281,14 +284,17 @@ export class BaseRouter<
   protected handleBeforeUnload = (event: BeforeUnloadEvent): void => {
     if (!this.confirmLeaveHook) return;
 
-    const externalTo: NavigationLocation = {
-      pathname: '',
-      search: '',
-      hash: '',
-      state: null,
-    };
-
-    if (!this.confirmLeaveHook(externalTo, this.captureCurrentRouteState())) {
+    if (
+      !this.confirmLeaveHook(
+        {
+          pathname: '',
+          search: '',
+          hash: '',
+          state: null,
+        },
+        this.currentRouteState(),
+      )
+    ) {
       event.preventDefault();
       event.returnValue = '';
     }
@@ -339,7 +345,7 @@ export class BaseRouter<
         hash: nextHash,
         state: options?.state ?? null,
       };
-      if (!this.confirmLeaveHook(to, this.captureCurrentRouteState())) return;
+      if (!this.confirmLeaveHook(to, this.currentRouteState())) return;
     }
 
     if (this.blockers.size > 0 && this.blockerState() !== 'proceeding') {
@@ -349,7 +355,7 @@ export class BaseRouter<
         hash: nextHash,
         state: nextState,
       };
-      const from = this.captureCurrentRouteState();
+      const from = this.currentRouteState();
       const shouldBlock = [...this.blockers.values()].some((fn) =>
         fn(to, from),
       );
@@ -473,7 +479,7 @@ export class BaseRouter<
 
       this.currentHash(nextHash);
       this.currentHistoryState(nextState);
-      this.notifyAfterNavigate(this.captureCurrentRouteState());
+      this.notifyAfterNavigate(this.currentRouteState());
       scrollToFragment(nextHash, null);
       return;
     }
@@ -592,22 +598,17 @@ export class BaseRouter<
 
   public getSnapshot = (): RouterSnapshot<TMeta> => {
     return {
-      navigate: this.navigate,
-      navigateExternal: this.navigateExternal,
-      generatePath: this.generatePath,
-      createHref: this.createHref,
-      back: this.back,
-      forward: this.forward,
-      go: this.go,
-      hasRoute: this.hasRoute,
-      resolveRoute: this.resolveRoute,
-
       params: this.currentParams(),
       searchParams: this.currentSearchParams(),
-      route: {
-        name: this.currentRouteName(),
-        meta: this.currentMeta(),
-        pattern: this.currentPattern(),
+      searchParamsAPI: {
+        setSearchParam: this.setSearchParam,
+        appendSearchParam: this.appendSearchParam,
+        deleteSearchParam: this.deleteSearchParam,
+        patchSearchParams: this.patchSearchParams,
+        replaceAllSearchParams: this.replaceAllSearchParams,
+        getSearchParam: this.getSearchParam,
+        getAllSearchParams: this.getAllSearchParams,
+        hasSearchParam: this.hasSearchParam,
       },
       location: {
         pathname: this.currentPathname(),
@@ -615,26 +616,34 @@ export class BaseRouter<
         search: this.currentSearch(),
         state: this.currentHistoryState(),
       },
-
-      pendingLocation: this.pendingLocation(),
-      isNavigating: this.isNavigating(),
-      navigationType: this.currentNavigationType(),
-      blockerState: this.blockerState(),
-      blockedTo: this.blockedTo(),
-      setBlocker: this.setBlocker,
-      proceedBlocked: this.proceedBlocked,
-      resetBlocked: this.resetBlocked,
-      isActive: this.isActive,
-      isExact: this.isExact,
-
-      setSearchParam: this.setSearchParam,
-      appendSearchParam: this.appendSearchParam,
-      deleteSearchParam: this.deleteSearchParam,
-      patchSearchParams: this.patchSearchParams,
-      replaceAllSearchParams: this.replaceAllSearchParams,
-      getSearchParam: this.getSearchParam,
-      getAllSearchParams: this.getAllSearchParams,
-      hasSearchParam: this.hasSearchParam,
+      locationAPI: {
+        navigate: this.navigate,
+        navigateExternal: this.navigateExternal,
+        back: this.back,
+        forward: this.forward,
+        go: this.go,
+        pendingLocation: this.pendingLocation(),
+        isNavigating: this.isNavigating(),
+        navigationType: this.currentNavigationType(),
+        blockerState: this.blockerState(),
+        blockedTo: this.blockedTo(),
+        setBlocker: this.setBlocker,
+        proceedBlocked: this.proceedBlocked,
+        resetBlocked: this.resetBlocked,
+      },
+      route: {
+        name: this.currentRouteName(),
+        meta: this.currentMeta(),
+        pattern: this.currentPattern(),
+      },
+      routeAPI: {
+        generatePath: this.generatePath,
+        createHref: this.createHref,
+        hasRoute: this.hasRoute,
+        resolveRoute: this.resolveRoute,
+        isActive: this.isActive,
+        isExact: this.isExact,
+      },
     };
   };
 
@@ -670,7 +679,7 @@ export class BaseRouter<
         hash: parsedNext.hash,
         state: nextUserState,
       };
-      if (!this.confirmLeaveHook(to, this.captureCurrentRouteState())) {
+      if (!this.confirmLeaveHook(to, this.currentRouteState())) {
         this.currentHistoryKey = previousHistoryKey;
         window.history.replaceState(
           wrapHistoryState(previousState, previousHistoryKey, previousMask),
@@ -686,7 +695,7 @@ export class BaseRouter<
       this.currentNavigationType('pop');
       this.currentHash(nextHash);
       this.currentHistoryState(nextUserState);
-      this.notifyAfterNavigate(this.captureCurrentRouteState());
+      this.notifyAfterNavigate(this.currentRouteState());
       scrollToFragment(nextHash, null);
       return;
     }
@@ -702,7 +711,7 @@ export class BaseRouter<
         hash: nextHash,
         state: nextUserState,
       };
-      const from = this.captureCurrentRouteState();
+      const from = this.currentRouteState();
       const shouldBlock = [...this.blockers.values()].some((fn) =>
         fn(to, from),
       );
@@ -1171,7 +1180,7 @@ export class BaseRouter<
   };
 
   protected applyState = (nextState: RouteState<TMeta>): void => {
-    this.previousRouteState = this.captureCurrentRouteState();
+    this.previousRouteState = this.currentRouteState();
     this.currentPathname(nextState.pathname);
     this.currentSearch(nextState.search);
     this.currentHash(nextState.hash);
@@ -1198,7 +1207,7 @@ export class BaseRouter<
     }
   };
 
-  protected captureCurrentRouteState = (): RouteState<TMeta> => ({
+  protected currentRouteState = (): RouteState<TMeta> => ({
     pathname: this.currentPathname(),
     search: this.currentSearch(),
     hash: this.currentHash(),
@@ -1345,7 +1354,7 @@ export class BaseRouter<
   protected notifyBeforeNavigate = (to: NavigationLocation): void => {
     this.isNavigating(true);
     this.pendingLocation(to);
-    this.beforeNavigateHook?.(to, this.captureCurrentRouteState());
+    this.beforeNavigateHook?.(to, this.currentRouteState());
   };
 
   protected notifyAfterNavigate = (to: RouteState<TMeta>): void => {
@@ -1356,7 +1365,7 @@ export class BaseRouter<
   };
 
   protected notifyNavigationBlocked = (to: NavigationLocation): void => {
-    this.onNavigationBlockedHook?.(to, this.captureCurrentRouteState());
+    this.onNavigationBlockedHook?.(to, this.currentRouteState());
   };
 
   protected notifyNavigationError = (

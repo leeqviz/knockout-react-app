@@ -11,11 +11,11 @@ export function NavBarItem({
   onNavigate?: () => void;
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { isActive } = useRouter();
+  const { routeAPI } = useRouter();
 
   const hasChildren = !!item.children?.length;
   const isParentActive =
-    hasChildren && item.children!.some((c) => isActive(c.to));
+    hasChildren && item.children!.some((c) => routeAPI.isActive(c.to));
 
   const closeDropdown = useCallback(() => setDropdownOpen(false), []);
 

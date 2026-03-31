@@ -8,15 +8,17 @@ export interface ActiveState {
 }
 
 export function useActiveState(path: string): ActiveState {
-  const { isActive, isExact, isNavigating, pendingLocation } = useRouter();
+  const { routeAPI, locationAPI } = useRouter();
 
   return useMemo(
     () => ({
-      isActive: isActive(path),
-      isExact: isExact(path),
+      isActive: routeAPI.isActive(path),
+      isExact: routeAPI.isExact(path),
       isPending:
-        isNavigating && isActive(path) && pendingLocation?.pathname === path,
+        locationAPI.isNavigating &&
+        routeAPI.isActive(path) &&
+        locationAPI.pendingLocation?.pathname === path,
     }),
-    [path, isActive, isExact, isNavigating, pendingLocation],
+    [path, routeAPI, locationAPI],
   );
 }

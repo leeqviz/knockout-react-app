@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useRouter } from './use-router';
 
 export function usePrefetch() {
-  const { resolveRoute } = useRouter();
+  const { resolveRoute } = useRouter().routeAPI;
 
   return useCallback(
     (path: string) => {

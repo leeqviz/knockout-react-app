@@ -2,10 +2,10 @@ import { toPath } from '../utils';
 import { useRouter } from './use-router';
 
 export function usePendingMatch(path: string): boolean {
-  const { isNavigating, pendingLocation, isActive } = useRouter();
+  const { locationAPI, routeAPI } = useRouter();
 
-  if (!isNavigating || !pendingLocation) return false;
+  if (!locationAPI.isNavigating || !locationAPI.pendingLocation) return false;
 
   const targetPath = toPath(path);
-  return isActive(targetPath);
+  return routeAPI.isActive(targetPath);
 }

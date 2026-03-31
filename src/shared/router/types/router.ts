@@ -127,72 +127,75 @@ export interface ResolvedRoute<
 export interface RouterSnapshot<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 > {
-  navigate: (path: string, options?: NavigateOptions) => void;
-  navigateExternal: (path: string, options?: NavigateExternalOptions) => void;
-  setSearchParam: (
-    key: string,
-    value: string,
-    options?: NavigateOptions,
-  ) => void;
-  appendSearchParam: (
-    key: string,
-    value: string,
-    options?: NavigateOptions,
-  ) => void;
-  deleteSearchParam: (
-    key: string,
-    value?: string,
-    options?: NavigateOptions,
-  ) => void;
-  patchSearchParams: (
-    patch: Record<string, string | string[] | null | undefined>,
-    options?: NavigateOptions,
-  ) => void;
-  replaceAllSearchParams: (
-    searchParams: RouteSearchParams,
-    options?: NavigateOptions,
-  ) => void;
-
-  back: (fallback?: string | undefined) => void;
-  forward: () => void;
-  go: (delta: number) => void;
-
-  generatePath: (
-    name: string,
-    params?: RouteParams,
-    search?: RouteSearchParams | URLSearchParams,
-    hash?: string,
-  ) => string;
-  createHref: (path: string) => string;
-  hasRoute: (name: string) => boolean;
-  resolveRoute: (path: string) => ResolvedRoute<TMeta> | null;
-  isActive: (path: string) => boolean;
-  isExact: (path: string) => boolean;
-  getSearchParam: (key: string) => string | null;
-  getAllSearchParams: (key: string) => string[];
-  hasSearchParam: (key: string) => boolean;
-
-  isNavigating: boolean;
   params: RouteParams;
   searchParams: RouteSearchParams;
+  searchParamsAPI: {
+    getSearchParam: (key: string) => string | null;
+    getAllSearchParams: (key: string) => string[];
+    hasSearchParam: (key: string) => boolean;
+    setSearchParam: (
+      key: string,
+      value: string,
+      options?: NavigateOptions,
+    ) => void;
+    appendSearchParam: (
+      key: string,
+      value: string,
+      options?: NavigateOptions,
+    ) => void;
+    deleteSearchParam: (
+      key: string,
+      value?: string,
+      options?: NavigateOptions,
+    ) => void;
+    patchSearchParams: (
+      patch: Record<string, string | string[] | null | undefined>,
+      options?: NavigateOptions,
+    ) => void;
+    replaceAllSearchParams: (
+      searchParams: RouteSearchParams,
+      options?: NavigateOptions,
+    ) => void;
+  };
+  location: NavigationLocation;
+  locationAPI: {
+    pendingLocation: NavigationLocation | null;
+    navigationType: RouterNavigationType;
+    isNavigating: boolean;
+    navigate: (path: string, options?: NavigateOptions) => void;
+    navigateExternal: (path: string, options?: NavigateExternalOptions) => void;
+    back: (fallback?: string | undefined) => void;
+    forward: () => void;
+    go: (delta: number) => void;
+    blockerState: BlockerState;
+    blockedTo: NavigationLocation | null;
+    setBlocker: (
+      id: string,
+      fn:
+        | ((to: NavigationLocation, from: RouteState<TMeta> | null) => boolean)
+        | null,
+    ) => void;
+    proceedBlocked: () => void;
+    resetBlocked: () => void;
+  };
   route: {
     name?: string | undefined;
     meta?: TMeta | undefined;
     pattern?: string | undefined;
   };
-  location: NavigationLocation;
-  pendingLocation: NavigationLocation | null;
-  navigationType: RouterNavigationType;
-  blockerState: BlockerState;
-  blockedTo: NavigationLocation | null;
-  setBlocker: (
-    id: string,
-    fn:
-      | ((to: NavigationLocation, from: RouteState<TMeta> | null) => boolean)
-      | null,
-  ) => void;
-  proceedBlocked: () => void;
-  resetBlocked: () => void;
+  routeAPI: {
+    generatePath: (
+      name: string,
+      params?: RouteParams,
+      search?: RouteSearchParams | URLSearchParams,
+      hash?: string,
+    ) => string;
+    createHref: (path: string) => string;
+    hasRoute: (name: string) => boolean;
+    resolveRoute: (path: string) => ResolvedRoute<TMeta> | null;
+    isActive: (path: string) => boolean;
+    isExact: (path: string) => boolean;
+  };
 }
 
 export interface ParsedURL {

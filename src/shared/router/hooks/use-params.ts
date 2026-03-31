@@ -1,4 +1,3 @@
-// useParams.ts
 import type { RouteParams } from '../types';
 import { useRouter } from './use-router';
 

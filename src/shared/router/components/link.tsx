@@ -40,14 +40,14 @@ export function Link({
 }: LinkProps) {
   const router = useRouter();
 
-  const isActive = !external && router.isActive(toPath(to));
-  const isExact = !external && router.isExact(toPath(to));
-  const isNavigating = router.isNavigating;
+  const isActive = !external && router.routeAPI.isActive(toPath(to));
+  const isExact = !external && router.routeAPI.isExact(toPath(to));
+  const isNavigating = router.locationAPI.isNavigating;
 
   const href = useMemo(() => {
     if (external) return toPath(to);
     try {
-      return router.createHref(toPath(to));
+      return router.routeAPI.createHref(toPath(to));
     } catch {
       return toPath(to);
     }
@@ -78,11 +78,17 @@ export function Link({
       e.preventDefault();
 
       if (external) {
-        router.navigateExternal(toPath(to), { target, allowAnyProtocol });
+        router.locationAPI.navigateExternal(toPath(to), {
+          target,
+          allowAnyProtocol,
+        });
         return;
       }
 
-      router.navigate(toPath(to), { replace, state: state ?? null });
+      router.locationAPI.navigate(toPath(to), {
+        replace,
+        state: state ?? null,
+      });
     },
     [
       onClick,
@@ -104,7 +110,7 @@ export function Link({
       href={disabled ? undefined : href}
       className={resolvedClassName}
       aria-current={
-        !external && router.isExact(toPath(to)) ? 'page' : undefined
+        !external && router.routeAPI.isExact(toPath(to)) ? 'page' : undefined
       }
       onClick={handleClick}
       target={target}

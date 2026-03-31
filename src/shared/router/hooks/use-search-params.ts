@@ -1,4 +1,3 @@
-// useSearchParams.ts
 import type { NavigateOptions, RouteSearchParams } from '../types';
 import { useRouter } from './use-router';
 
@@ -17,18 +16,19 @@ interface SearchParamActions {
 }
 
 export function useSearchParams(): [RouteSearchParams, SearchParamActions] {
-  const router = useRouter();
+  const { searchParamsAPI, searchParams } = useRouter();
 
-  const actions: SearchParamActions = {
-    set: router.setSearchParam,
-    append: router.appendSearchParam,
-    delete: router.deleteSearchParam,
-    patch: router.patchSearchParams,
-    replaceAll: router.replaceAllSearchParams,
-    get: router.getSearchParam,
-    getAll: router.getAllSearchParams,
-    has: router.hasSearchParam,
-  };
-
-  return [router.searchParams, actions];
+  return [
+    searchParams,
+    {
+      set: searchParamsAPI.setSearchParam,
+      append: searchParamsAPI.appendSearchParam,
+      delete: searchParamsAPI.deleteSearchParam,
+      patch: searchParamsAPI.patchSearchParams,
+      replaceAll: searchParamsAPI.replaceAllSearchParams,
+      get: searchParamsAPI.getSearchParam,
+      getAll: searchParamsAPI.getAllSearchParams,
+      has: searchParamsAPI.hasSearchParam,
+    },
+  ];
 }

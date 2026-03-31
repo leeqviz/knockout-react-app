@@ -9,7 +9,7 @@ export interface Navigation {
 }
 
 export function useNavigation(): Navigation {
-  const { isNavigating, pendingLocation } = useRouter();
+  const { isNavigating, pendingLocation } = useRouter().locationAPI;
 
   return {
     state: isNavigating ? 'loading' : 'idle',

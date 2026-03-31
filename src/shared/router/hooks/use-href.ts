@@ -3,5 +3,5 @@ import { toPath } from '../utils';
 import { useRouter } from './use-router';
 
 export function useHref(to: To): string {
-  return useRouter().createHref(toPath(to));
+  return useRouter().routeAPI.createHref(toPath(to));
 }

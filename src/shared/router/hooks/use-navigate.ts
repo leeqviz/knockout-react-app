@@ -3,8 +3,7 @@ import type { NavigateOptions, RouteParams, RouteSearchParams } from '../types';
 import { useRouter } from './use-router';
 
 export function useNavigate() {
-  const { navigate, navigateExternal, back, forward, go, generatePath } =
-    useRouter();
+  const { locationAPI, routeAPI } = useRouter();
 
   const navigateTo = useCallback(
     (
@@ -13,16 +12,20 @@ export function useNavigate() {
       searchParams?: RouteSearchParams,
       hash?: string,
       options?: NavigateOptions,
-    ) => navigate(generatePath(name, params, searchParams, hash), options),
-    [navigate, generatePath],
+    ) =>
+      locationAPI.navigate(
+        routeAPI.generatePath(name, params, searchParams, hash),
+        options,
+      ),
+    [locationAPI, routeAPI],
   );
 
   return {
     navigateTo,
-    navigate,
-    navigateExternal,
-    back,
-    forward,
-    go,
+    navigate: locationAPI.navigate,
+    navigateExternal: locationAPI.navigateExternal,
+    back: locationAPI.back,
+    forward: locationAPI.forward,
+    go: locationAPI.go,
   };
 }

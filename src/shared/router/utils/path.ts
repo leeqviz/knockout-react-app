@@ -1,4 +1,9 @@
-import type { ParsedURL, RouteSearchParams, To } from '../types';
+import type {
+  NavigationLocation,
+  ParsedURL,
+  RouteSearchParams,
+  To,
+} from '../types';
 
 export function normalizePath(path: string): string {
   if (!path || path === '/') return '/';
@@ -81,4 +86,17 @@ export function resolveTo(
 export function toPath(to: To): string {
   if (typeof to === 'string') return to;
   return to.pathname + (to.search ?? '') + (to.hash ?? '');
+}
+
+export function mapLocation(
+  url: { pathname: string; search: string },
+  hash: string,
+  state: unknown,
+): NavigationLocation {
+  return {
+    pathname: url.pathname,
+    search: url.search,
+    hash,
+    state,
+  };
 }

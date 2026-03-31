@@ -8,7 +8,7 @@ export interface Breadcrumb {
 }
 
 export function useBreadcrumbs(): Breadcrumb[] {
-  const { location, route, resolveRoute } = useRouter<{
+  const { location, route, routeAPI } = useRouter<{
     breadcrumb?: string;
   }>();
 
@@ -17,7 +17,7 @@ export function useBreadcrumbs(): Breadcrumb[] {
 
     return segments.map((_, i) => {
       const path = '/' + segments.slice(0, i + 1).join('/');
-      const matched = resolveRoute(path);
+      const matched = routeAPI.resolveRoute(path);
       return {
         label: matched?.meta?.breadcrumb ?? segments[i] ?? '',
         path,
@@ -25,5 +25,5 @@ export function useBreadcrumbs(): Breadcrumb[] {
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, route.meta, resolveRoute]);
+  }, [location.pathname, route.meta, routeAPI.resolveRoute]);
 }

@@ -16,7 +16,7 @@ export interface Blocker {
 export function useBlocker<
   TMeta extends Record<string, unknown> = Record<string, unknown>,
 >(shouldBlock: boolean | BlockerFunction<TMeta>): Blocker {
-  const router = useRouter<TMeta>();
+  const { locationAPI } = useRouter<TMeta>();
   const id = useId();
 
   const shouldBlockRef = useRef(shouldBlock);
@@ -25,17 +25,17 @@ export function useBlocker<
   });
 
   useEffect(() => {
-    router.setBlocker(id, (to, from) => {
+    locationAPI.setBlocker(id, (to, from) => {
       const fn = shouldBlockRef.current;
       return typeof fn === 'function' ? fn(to, from) : fn;
     });
-    return () => router.setBlocker(id, null);
-  }, [router, id]);
+    return () => locationAPI.setBlocker(id, null);
+  }, [locationAPI, id]);
 
   return {
-    state: router.blockerState,
-    location: router.blockedTo,
-    proceed: router.proceedBlocked,
-    reset: router.resetBlocked,
+    state: locationAPI.blockerState,
+    location: locationAPI.blockedTo,
+    proceed: locationAPI.proceedBlocked,
+    reset: locationAPI.resetBlocked,
   };
 }
