@@ -75,7 +75,7 @@ export class AppViewModel extends BaseViewModel {
     this.appRouter.start();
     this.bindingOptions = ko.pureComputed(
       (): ComponentBindingOptions => ({
-        name: appRouter.currentComponent(),
+        name: appRouter.component(),
         params: { withRouter: true },
       }),
     );

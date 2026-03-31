@@ -21,7 +21,10 @@ export const linkBindingHandler: KnockoutBindingHandler = {
   update: function (element: HTMLElement) {
     const targetPath = element.getAttribute('href');
 
-    const currentPath = appRouter.currentPathname();
+    const currentPath =
+      appRouter.locationPathname() +
+      appRouter.locationSearch() +
+      appRouter.locationHash();
 
     if (targetPath === currentPath) element.classList.add('active');
     else element.classList.remove('active');
