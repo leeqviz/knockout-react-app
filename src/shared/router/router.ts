@@ -33,6 +33,7 @@ import {
   AllowedURLProtocols,
   applyQueryParamConfig,
   buildPath,
+  compareReference,
   defaultScrollBehaviorResolver,
   generateHistoryStateKey,
   getFullPath,
@@ -71,6 +72,7 @@ export class BaseRouter<
 
   protected readonly stateCompare: (a: unknown, b: unknown) => boolean;
   protected readonly scrollBehaviorResolver: ScrollBehaviorStrategy<TMeta>;
+
   protected readonly titleResolver: TitleResolver<TMeta> | undefined;
   protected readonly metaTagsResolver: MetaTagsResolver<TMeta> | undefined;
 
@@ -111,27 +113,30 @@ export class BaseRouter<
   public snapshot: KnockoutComputed<RouterSnapshot<TMeta>>;
 
   protected constructor(options?: RouterOptions<TMeta>) {
-    this.routes = rankRoutes(options?.routes ?? []);
-    this.base = normalizeBase(options?.base ?? '');
-    this.debug = options?.debug ?? false;
-    this.caseSensitive = options?.caseSensitive ?? false;
-    this.maxScrollEntries = options?.maxScrollEntries ?? 50;
-    this.maxRewriteDepth = options?.maxRewriteDepth ?? 10;
+    this.routes = rankRoutes(options?.routes || []);
+    this.base = normalizeBase(options?.base || '');
+    this.debug = options?.debug || false;
+    this.caseSensitive = options?.caseSensitive || false;
+    this.maxScrollEntries = options?.maxScrollEntries || 50;
+    this.maxRewriteDepth = options?.maxRewriteDepth || 10;
     this.middlewares = options?.middlewares || [];
+    this.enableBeforeUnload = options?.enableBeforeUnload || true;
+    this.fallback = options?.fallback || '';
+
     this.scrollBehaviorResolver =
-      options?.scrollBehaviorResolver ?? defaultScrollBehaviorResolver;
-    this.stateCompare = resolveComparator(options?.stateCompare);
+      options?.scrollBehaviorResolver || defaultScrollBehaviorResolver;
+    this.stateCompare = resolveComparator(
+      options?.stateCompare || compareReference,
+    );
+
     this.titleResolver = options?.titleResolver;
     this.metaTagsResolver = options?.metaTagsResolver;
+
     this.beforeNavigation = options?.beforeNavigate;
     this.afterNavigation = options?.afterNavigate;
     this.onRouteBlocked = options?.onNavigationBlocked;
     this.onRouteError = options?.onNavigationError;
     this.onRouteLeave = options?.confirmLeave;
-    this.enableBeforeUnload = options?.confirmLeave
-      ? (options?.enableBeforeUnload ?? true)
-      : false;
-    this.fallback = options?.fallback ?? '';
     this.onRouteNotFound = options?.onNavigationNotFound;
 
     const initialUrl = new URL(window.location.href);
@@ -169,6 +174,7 @@ export class BaseRouter<
     this.navigationType = ko.observable<RouterNavigationType>('pop');
     this.blockerState = ko.observable<BlockerState>('unblocked');
     this.blockedLocation = ko.observable(null);
+
     this.snapshot = ko.pureComputed(() => this.getSnapshot());
   }
 
@@ -321,12 +327,8 @@ export class BaseRouter<
     const { data: currentUserState } = readHistoryState(window.history.state);
     const nextState = options?.state ?? null;
 
-    const comparator = options?.stateCompare
-      ? resolveComparator(options.stateCompare)
-      : this.stateCompare;
-
     const samePath = currentFullPath === nextFullPath;
-    const sameState = comparator(currentUserState, nextState);
+    const sameState = this.stateCompare(currentUserState, nextState);
     const sameHash = this.locationHash() === nextHash;
 
     if (
