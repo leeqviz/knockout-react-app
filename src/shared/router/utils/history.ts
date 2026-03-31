@@ -7,17 +7,19 @@ export function generateHistoryStateKey(): string {
 export function wrapHistoryState<T = unknown>(
   data: T,
   key?: string,
+  mask?: string,
 ): HistoryState<T> {
   return {
     data,
     key: key || generateHistoryStateKey(),
+    ...(mask ? { mask } : {}),
   };
 }
 
 export function readHistoryState<T = unknown>(raw: unknown): HistoryState<T> {
   if (raw !== null && typeof raw === 'object' && 'key' in raw) {
     const entry = raw as HistoryState<T>;
-    return { key: entry.key, data: entry.data };
+    return { key: entry.key, data: entry.data, mask: entry.mask };
   }
   return { key: generateHistoryStateKey(), data: raw as T };
 }

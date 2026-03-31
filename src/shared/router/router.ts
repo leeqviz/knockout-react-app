@@ -92,6 +92,7 @@ export class BaseRouter<
     (to: NavigationLocation, from: RouteState<TMeta> | null) => boolean
   >();
   protected pendingProceed: (() => void) | null = null;
+  protected currentMask: string | undefined;
 
   public currentComponent: KnockoutObservable<string>;
   public currentParams: KnockoutObservable<RouteParams>;
@@ -272,6 +273,7 @@ export class BaseRouter<
     this.blockerState('unblocked');
     this.blockedTo(null);
     this.pendingProceed = null;
+    this.currentMask = undefined;
     this.blockers.clear();
     this.snapshot.dispose();
   };
@@ -321,7 +323,14 @@ export class BaseRouter<
     const sameState = comparator(currentUserState, nextState);
     const sameHash = this.currentHash() === nextHash;
 
-    if (!options?.force && samePath && sameState && sameHash) return;
+    if (
+      !options?.force &&
+      samePath &&
+      sameState &&
+      sameHash &&
+      !options?.rewriteTo
+    )
+      return;
 
     if (this.confirmLeaveHook && !samePath) {
       const to: NavigationLocation = {
@@ -350,6 +359,105 @@ export class BaseRouter<
         this.pendingProceed = () => this.navigate(path, options);
         return;
       }
+    }
+
+    if (options?.rewriteTo) {
+      const actualUrl = resolveTo(
+        options.rewriteTo,
+        this.currentPathname(),
+        this.currentSearch(),
+      );
+      const actualFullPath =
+        normalizePath(actualUrl.pathname) + actualUrl.search;
+      const actualResult = this.resolvePath(actualFullPath, nextState);
+
+      handleResolveResult(actualResult, {
+        onResolved: (res) => {
+          const maskedState: RouteState<TMeta> = {
+            pathname: normalizePath(nextUrl.pathname),
+            search: nextUrl.search,
+            searchParams: parseUrl(nextUrl).searchParams,
+            hash: nextHash,
+            component: res.value.component,
+            params: res.value.params,
+            name: res.value.name,
+            meta: res.value.meta,
+            pattern: res.value.pattern,
+            state: nextState,
+          };
+
+          const visiblePath =
+            addBase(
+              normalizePath(nextUrl.pathname) + nextUrl.search,
+              this.base,
+            ) + nextHash;
+
+          this.notifyBeforeNavigate({
+            pathname: maskedState.pathname,
+            search: maskedState.search,
+            hash: nextHash,
+            state: nextState,
+          });
+          this.pushOrReplace(
+            visiblePath,
+            nextState,
+            options.replace,
+            options.rewriteTo,
+          );
+          this.applyState(maskedState);
+          this.notifyAfterNavigate(maskedState);
+          this.handleScroll({
+            to: maskedState,
+            from: this.previousRouteState,
+            options: null,
+          });
+        },
+        onNotFound: () => {
+          const error = new Error(
+            `navigate mask: no route matches "${options.rewriteTo}"`,
+          );
+          const handled = this.notifyNavigationError(error, {
+            pathname: normalizePath(nextUrl.pathname),
+            search: nextUrl.search,
+            hash: nextHash,
+            state: nextState,
+          });
+          if (!handled) throw error;
+        },
+        onRedirect: (res) => {
+          this.navigate(nextUrl.pathname + nextUrl.search + nextHash, {
+            ...options,
+            rewriteTo: res.to,
+          });
+        },
+        onBlocked: () => {
+          this.notifyNavigationBlocked({
+            pathname: normalizePath(nextUrl.pathname),
+            search: nextUrl.search,
+            hash: nextHash,
+            state: nextState,
+          });
+        },
+        onRewrite: (res) => {
+          const visibleOriginalUrl = parseUrl(
+            new URL(
+              normalizePath(nextUrl.pathname) + nextUrl.search + nextHash,
+              window.location.origin,
+            ),
+          );
+          this.resolveRewrite(visibleOriginalUrl, res.to, nextState);
+        },
+        onError: (res) => {
+          const handled = this.notifyNavigationError(res.error, {
+            pathname: normalizePath(nextUrl.pathname),
+            search: nextUrl.search,
+            hash: nextHash,
+            state: nextState,
+          });
+          if (!handled) throw res.error;
+        },
+      });
+      return;
     }
 
     if (samePath && sameState && !sameHash) {
@@ -463,11 +571,13 @@ export class BaseRouter<
     path: string,
     state: unknown,
     replace?: boolean,
+    mask?: string,
   ): void => {
+    this.currentMask = mask;
     if (replace) {
       this.currentNavigationType('replace');
       window.history.replaceState(
-        wrapHistoryState(state, this.currentHistoryKey),
+        wrapHistoryState(state, this.currentHistoryKey, mask),
         '',
         path,
       );
@@ -476,7 +586,7 @@ export class BaseRouter<
       const key = generateHistoryStateKey();
       this.currentHistoryKey = key;
       this.currentNavigationType('push');
-      window.history.pushState(wrapHistoryState(state, key), '', path);
+      window.history.pushState(wrapHistoryState(state, key, mask), '', path);
     }
   };
 
@@ -535,12 +645,15 @@ export class BaseRouter<
     const previousHash = this.currentHash();
     const previousState = this.currentHistoryState();
     const previousHistoryKey = this.currentHistoryKey;
+    const previousMask = this.currentMask;
 
     const nextFullPath = getFullPath(this.base);
     const nextHash = window.location.hash;
-    const { key: nextKey, data: nextUserState } = readHistoryState(
-      window.history.state,
-    );
+    const {
+      key: nextKey,
+      data: nextUserState,
+      mask,
+    } = readHistoryState(window.history.state);
 
     const savedScrollOption = this.scrollOptions.get(nextKey) ?? null;
     this.currentHistoryKey = nextKey;
@@ -560,7 +673,7 @@ export class BaseRouter<
       if (!this.confirmLeaveHook(to, this.captureCurrentRouteState())) {
         this.currentHistoryKey = previousHistoryKey;
         window.history.replaceState(
-          wrapHistoryState(previousState, previousHistoryKey),
+          wrapHistoryState(previousState, previousHistoryKey, previousMask),
           '',
           addBase(previousFullPath, this.base) + previousHash,
         );
@@ -599,6 +712,7 @@ export class BaseRouter<
           previousState,
           previousFullPath,
           previousHash,
+          previousMask,
         );
         this.blockerState('blocked');
         this.blockedTo(to);
@@ -606,9 +720,182 @@ export class BaseRouter<
         this.pendingProceed = () =>
           this.navigate(to.pathname + to.search + to.hash, {
             state: nextUserState,
+            ...(mask ? { rewriteTo: mask } : {}),
           });
         return;
       }
+    }
+
+    if (mask) {
+      const maskedUrl = resolveTo(mask, '/', '');
+      const maskedFullPath =
+        normalizePath(maskedUrl.pathname) + maskedUrl.search;
+      const result = this.resolvePath(maskedFullPath, nextUserState);
+
+      handleResolveResult(result, {
+        onResolved: (res) => {
+          const maskedState: RouteState<TMeta> = {
+            pathname: originalUrl.pathname,
+            search: originalUrl.search,
+            searchParams: originalUrl.searchParams,
+            hash: nextHash,
+            component: res.value.component,
+            params: res.value.params,
+            name: res.value.name,
+            meta: res.value.meta,
+            pattern: res.value.pattern,
+            state: nextUserState,
+          };
+          this.currentNavigationType('pop');
+          this.notifyBeforeNavigate({
+            pathname: maskedState.pathname,
+            search: maskedState.search,
+            hash: nextHash,
+            state: nextUserState,
+          });
+          this.applyState(maskedState);
+          this.notifyAfterNavigate(maskedState);
+          this.handleScroll({
+            to: maskedState,
+            from: this.previousRouteState,
+            options: savedScrollOption,
+          });
+        },
+        onNotFound: () => {
+          const fallbackResult = this.resolvePath(nextFullPath, nextUserState);
+          handleResolveResult(fallbackResult, {
+            onResolved: (res) => {
+              this.currentNavigationType('pop');
+              const nextRouteState = { ...res.value, hash: nextHash };
+              this.notifyBeforeNavigate({
+                pathname: nextRouteState.pathname,
+                search: nextRouteState.search,
+                hash: nextHash,
+                state: nextUserState,
+              });
+              this.applyState(nextRouteState);
+              this.notifyAfterNavigate(nextRouteState);
+              this.handleScroll({
+                to: nextRouteState,
+                from: this.previousRouteState,
+                options: savedScrollOption,
+              });
+            },
+            onNotFound: () => {
+              this.notifyNavigationNotFound({
+                pathname: originalUrl.pathname,
+                search: originalUrl.search,
+                hash: nextHash,
+                state: nextUserState,
+              });
+              const s = this.buildNotFoundState(
+                originalUrl.pathname,
+                originalUrl.search,
+                nextHash,
+                nextUserState,
+              );
+              if (s) {
+                this.currentNavigationType('pop');
+                this.notifyBeforeNavigate({
+                  pathname: originalUrl.pathname,
+                  search: originalUrl.search,
+                  hash: nextHash,
+                  state: nextUserState,
+                });
+                this.applyState(s);
+                this.notifyAfterNavigate(s);
+                this.handleScroll({
+                  to: s,
+                  from: this.previousRouteState,
+                  options: savedScrollOption,
+                });
+              } else
+                this.rollbackHistory(
+                  previousHistoryKey,
+                  previousState,
+                  previousFullPath,
+                  previousHash,
+                  previousMask,
+                );
+            },
+            onRedirect: (res) => {
+              this.navigate(res.to, { replace: true, state: null });
+            },
+            onRewrite: (res) => {
+              this.resolveRewrite(
+                originalUrl,
+                res.to,
+                nextUserState,
+                savedScrollOption,
+              );
+            },
+            onBlocked: () => {
+              this.rollbackHistory(
+                previousHistoryKey,
+                previousState,
+                previousFullPath,
+                previousHash,
+                previousMask,
+              );
+              this.notifyNavigationBlocked({
+                pathname: originalUrl.pathname,
+                search: originalUrl.search,
+                hash: nextHash,
+                state: nextUserState,
+              });
+            },
+            onError: (res) => {
+              if (
+                !this.notifyNavigationError(res.error, {
+                  pathname: originalUrl.pathname,
+                  search: originalUrl.search,
+                  hash: nextHash,
+                  state: nextUserState,
+                })
+              )
+                throw res.error;
+            },
+          });
+        },
+        onBlocked: () => {
+          this.rollbackHistory(
+            previousHistoryKey,
+            previousState,
+            previousFullPath,
+            previousHash,
+            previousMask,
+          );
+          this.notifyNavigationBlocked({
+            pathname: originalUrl.pathname,
+            search: originalUrl.search,
+            hash: nextHash,
+            state: nextUserState,
+          });
+        },
+        onRedirect: (res) => {
+          this.navigate(res.to, { replace: true, state: null });
+        },
+        onRewrite: (res) => {
+          this.resolveRewrite(
+            originalUrl,
+            res.to,
+            nextUserState,
+            savedScrollOption,
+          );
+        },
+        onError: (res) => {
+          if (
+            !this.notifyNavigationError(res.error, {
+              pathname: originalUrl.pathname,
+              search: originalUrl.search,
+              hash: nextHash,
+              state: nextUserState,
+            })
+          )
+            throw res.error;
+        },
+      });
+      return;
     }
 
     const result = this.resolvePath(nextFullPath, nextUserState);
@@ -620,6 +907,7 @@ export class BaseRouter<
           previousState,
           previousFullPath,
           previousHash,
+          previousMask,
         );
         this.notifyNavigationBlocked({
           pathname: originalUrl.pathname,
@@ -635,6 +923,7 @@ export class BaseRouter<
             previousState,
             previousFullPath,
             previousHash,
+            previousMask,
           );
           return;
         }
@@ -704,31 +993,33 @@ export class BaseRouter<
             options: savedScrollOption,
           });
         } else {
-          // notFoundComponent не задан — откатываемся, чтобы не потерять UI
           this.rollbackHistory(
             previousHistoryKey,
             previousState,
             previousFullPath,
             previousHash,
+            previousMask,
           );
         }
       },
     });
   };
 
-  protected rollbackHistory(
+  protected rollbackHistory = (
     key: string,
     state: unknown,
     fullPath: string,
     hash: string,
-  ): void {
+    mask?: string,
+  ): void => {
     this.currentHistoryKey = key;
+    this.currentMask = mask;
     window.history.replaceState(
-      wrapHistoryState(state, key),
+      wrapHistoryState(state, key, mask),
       '',
       addBase(fullPath, this.base) + hash,
     );
-  }
+  };
 
   protected resolveRewrite = (
     originalUrl: ParsedURL,

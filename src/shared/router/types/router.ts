@@ -105,6 +105,7 @@ export interface NavigateOptions {
   state?: unknown;
   stateCompare?: StateCompareStrategy;
   force?: boolean;
+  rewriteTo?: string | undefined;
 }
 
 export interface NavigateExternalOptions {
